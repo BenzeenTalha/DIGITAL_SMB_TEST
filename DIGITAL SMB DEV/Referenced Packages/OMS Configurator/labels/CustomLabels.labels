@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>Annualised_total_header</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Annualised total header</shortDescription>
+        <value>Annualised Total</value>
+    </labels>
+    <labels>
+        <fullName>Non_recurring_header</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Non-recurring header</shortDescription>
+        <value>Non-Recurring Charge</value>
+    </labels>
+    <labels>
+        <fullName>Recurring_header</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Recurring header</shortDescription>
+        <value>Recurring Charge</value>
+    </labels>
+    <labels>
+        <fullName>Recurring_invoice_header</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Recurring invoice header</shortDescription>
+        <value>Recurring Invoice Amount</value>
+    </labels>
+    <labels>
+        <fullName>Total_contract_value_header</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Total contract value header</shortDescription>
+        <value>Total Contract Value</value>
+    </labels>
+</CustomLabels>

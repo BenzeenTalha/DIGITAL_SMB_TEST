@@ -1,0 +1,257 @@
+<apex:component controller="CSPOFA.DesignerController" id="designerComponent" allowDML="true">
+    <apex:attribute id="attributeRecordId" name="recordId" type="Id" required="true" assignTo="{!process}" description="Record on which you want to use designer. Currently Orchestrator process and process templates are supported." ></apex:attribute>
+    <apex:attribute id="attributeOnlyMove" name="onlyMove" type="Boolean" required="false" description="This attribut allows you to hide a toolbox. All options except moving items on the canvas and save layout and auto layout are disabled."></apex:attribute>
+
+    <!-- for production -->
+    <apex:includeScript value="{!URLFOR($Resource.CSPOFA__POFDESIGNER,'min/OrchestratorDesignerRaphael.min.js')}"/>
+    <!---->
+	<!-- for development/debug --
+    <apex:includeScript value="{!URLFOR($Resource.POFDESIGNER,'js/OrchestratorDesignerRaphael.js')}"/>
+    <!---->
+
+    <style type="text/css">
+        .toolboxCol { width: 15%; vertical-align: top; }
+        .visualiserCol { width: 85%; vertical-align: top;}
+        .toolbox { height:100%; overflow: auto; }
+        #tools, #steps, #toolbox, #toolbox p, .pan
+            { padding: 0.4em; margin: 0.1em; }
+    </style>
+
+    <apex:form id="designerActions">
+
+        <apex:actionRegion id="loading">
+            <apex:actionFunction id="jsLoadComponent" name="loadComponent" action="{!loadComponent}" reRender="components" onbeforedomupdate="" oncomplete="Designer.componentLoaded();" >
+                <apex:param id="jsLoadComponentParam" name="componentTypeParam" assignTo="{!componentType}" value=""></apex:param>
+            </apex:actionFunction>
+        </apex:actionRegion>
+
+        <apex:actionRegion id="processing">
+            <apex:actionFunction id="jsAddDependency" name="addDependency" action="{!addDependency}" reRender="dummy" onbeforedomupdate="" oncomplete="Designer.loadComponent('DEPENDENCY');">
+                <apex:param id="jsAddDependencyParam1" name="dependentParam" assignTo="{!dependent}" value=""></apex:param>
+                <apex:param id="jsAddDependencyParam2" name="dependencyParam" assignTo="{!dependency}" value=""></apex:param>
+            </apex:actionFunction>
+        </apex:actionRegion>
+
+        <apex:actionRegion id="uploading">
+            <apex:actionFunction id="jsEditDependency" name="editDependency" action="{!editDependency}" reRender="dummy" onbeforedomupdate="" oncomplete="Designer.loadComponent('DEPENDENCY');">
+                <apex:param id="jsEditDependencyParam" name="dependencyIdParam" assignTo="{!dependencyId}" value=""></apex:param>
+            </apex:actionFunction>
+
+            <apex:actionFunction id="jsAddStep" name="addStep" action="{!addStep}" reRender="dummy" onbeforedomupdate="" oncomplete="Designer.loadComponent('STEP');">
+                <apex:param id="jsAddStepParam" name="stepTypeParam" assignTo="{!stepType}" value=""></apex:param>
+            </apex:actionFunction>
+            <apex:actionFunction id="jsEditStep" name="editStep" action="{!editStep}" reRender="dummy" onbeforedomupdate="" oncomplete="Designer.loadComponent('STEP');">
+                <apex:param id="jsEditStepParam" name="stepIdParam" assignTo="{!stepId}" value=""></apex:param>
+            </apex:actionFunction>
+        </apex:actionRegion>
+
+        <apex:actionRegion id="deleteSteps">
+            <apex:actionFunction id="jsDeleteSteps" name="deleteSteps" action="{!deleteSteps}" reRender="dummy" onbeforedomupdate="" oncomplete="Designer.deleteStepsCompleted();">
+                <apex:param id="jsDeleteStepsParam" name="stepsForDeleteParam" assignTo="{!stepsForDelete}" value=""></apex:param>
+            </apex:actionFunction>
+        </apex:actionRegion>
+
+        <apex:actionRegion id="deleteDependencies">
+            <apex:actionFunction id="jsDeleteDependencies" name="deleteDependencies" action="{!deleteDependencies}" reRender="dummy" onbeforedomupdate="" oncomplete="Designer.deleteDependenciesCompleted();">
+                <apex:param id="jsDeleteDependenciesParam" name="dependenciesForDeleteParam" assignTo="{!dependenciesForDelete}" value=""></apex:param>
+            </apex:actionFunction>
+        </apex:actionRegion>
+
+        <apex:actionStatus id="statusLoading" for="loading" onstart="if(Designer.component != 'UNDEFINED') Form.info('Processing...');"></apex:actionStatus>
+        <apex:actionStatus id="statusUploading" for="uploading" onstart="Form.info('Processing...');"></apex:actionStatus>
+        <apex:actionStatus id="statusDeleteSteps" for="deleteSteps" onstart="Form.info('Deleting steps...');"></apex:actionStatus>
+        <apex:actionStatus id="statusDeleteDependencies" for="deleteDependencies" onstart="Form.info('Deleting dependencies...');"></apex:actionStatus>
+        <apex:actionStatus id="statusProcessing" for="processing" onstart="Form.info('Processing...');"></apex:actionStatus>
+
+        <!----
+        <apex:actionRegion id="saving">
+            <apex:actionFunction name="saveForComponent" action="{!saveForComponent}" reRender="components" onbeforedomupdate="//Form.close();" oncomplete="Designer.component = 'UNDEFINED'; loadComponent(Designer.component);">
+            </apex:actionFunction>
+        </apex:actionRegion>
+        <!---->
+        <!----
+        <apex:actionStatus for="saving" onstart="Form.info('Saving...');"></apex:actionStatus>
+        <!---->
+
+    </apex:form>
+
+    <apex:outputPanel style="display:none;" id="dummy"></apex:outputPanel>
+
+    <apex:outputPanel id="menus" rendered="{!IF(onlyMove, false, true)}">
+        <c:ModalDialog id="modalForm" name="Form" >
+            <apex:outputPanel id="components">
+                <c:ProcessTemplateStepDependency id="depComp" saveCallback="Designer.saveComplete" page="{!this}" handle="DEPENDENCY" rendered="{!IF(componentType == 'DEPENDENCY', true, false)}" dependencyId="{!dependencyId}" dependentStepId="{!dependent}" dependencyStepId="{!dependency}"/>
+                <c:ProcessTemplateStep id="stepComp" saveCallback="Designer.saveComplete" page="{!this}" handle="STEP" rendered="{!IF(componentType == 'STEP', true, false)}" stepId="{!stepId}" recordType="{!recordType}" process="{!process}"  stepType="{!stepTypeValue}" />
+            </apex:outputPanel>
+        </c:ModalDialog>
+
+        <c:ContextMenu id="canvasMenu" name="CanvasMenu" elementId="graphContainer" onOpenCallback="Designer.resolveMenu">
+        <!----
+          <button href="javascript:void(0)" onclick="CanvasMenu.close(); var steps = stepsSelected(); if(steps.length > 0) deleteStepList(steps); else Form.info('No steps for deletion.',750);" id="deleteSelectedSteps">Delete steps</button>
+        <!---->
+        <!-- <a> element click event is not prevented when jQ UI button is disabled-->
+          <a href="javascript:void(0);" onclick="CanvasMenu.close(); Designer.edit(); return false;" id="editElement">Edit</a>
+          <a href="javascript:void(0);" onclick="CanvasMenu.close(); Designer.deleteElement(); return false;" id="deleteElement">Delete</a>
+          <a href="javascript:void(0);" onclick="CanvasMenu.close(); Designer.deleteSelectedSteps(); return false;" id="deleteSelectedSteps">Delete steps</a>
+          <a href="javascript:void(0);" onclick="CanvasMenu.close(); Designer.deleteSelectedDependencies(); return false;" id="deleteSelectedDependencies">Delete dependencies</a>
+          <a href="javascript:void(0);" onclick="CanvasMenu.close(); Designer.toolbox.deselectNodes(); return false;" id="deselectNodes">Deselect steps</a>
+          <a href="javascript:void(0);" onclick="CanvasMenu.close(); Designer.toolbox.deselectEdges(); return false;" id="deselectEdges">Deselect dependencies</a>
+        </c:ContextMenu>
+    </apex:outputPanel>
+
+    <apex:form id="form">
+        <apex:pageBlock id="pageBlock" title="{!IF(onlyMove,'Orchestrator Visualiser','Orchestrator Designer')}">
+            <apex:pageBlockButtons id="buttons" >
+                <apex:commandButton id="saveLayout" value="Save layout" onclick="Visualiser.showMessage = true; Designer.saveLayout();" reRender="dummy" ></apex:commandButton>
+                <apex:commandButton id="autoLayout" value="Auto layout" onclick="Visualiser.showMessage = true; Visualiser.autoLayout(); Designer.hasChanges(true);" reRender="dummy" ></apex:commandButton>
+                <apex:commandButton id="resetLayout" value="Reset layout" onclick="Visualiser.showMessage = true; Visualiser.retriveLayout(); Designer.hasChanges(false);" reRender="dummy" ></apex:commandButton>
+            </apex:pageBlockButtons>
+
+            <apex:panelGrid id="grid" columns="2" columnClasses="toolboxCol,visualiserCol" width="100%">
+
+                <apex:outputPanel id="toolboxPanel" rendered="{!IF(onlyMove, false, true)}">
+                    <div id="toolbox" class="ui-widget-content toolbox">
+
+                        <p id="toolboxTitle" class="ui-widget-header"> Toolbox </p>
+                        <div id="accorditionWrap" style="min-width:150px">
+                            <div id="accordition">
+
+                                <p><a href="#">Tools</a></p>
+                                <div id="tools">
+                                    <div id="toolItems" class="ui-widget">
+                                        <p id="select" class="ui-widget-content ui-state-active">   <span class="ui-icon ui-icon-arrow-1-nw" style="display:inline-block"></span> Select</p>
+                                        <p id="drag" class="ui-widget-content">                     <span class="ui-icon ui-icon-arrow-4-diag" style="display:inline-block"></span> Move</p>
+                                        <p id="connect" class="ui-widget-content">                  <span class="ui-icon ui-icon-arrow-2-e-w" style="display:inline-block"></span> Connect</p>
+                                    </div>
+                                </div>
+
+                                <p><a href="#">Steps</a></p>
+                                <div id="steps">
+                                    <div id="stepItems" class="ui-widget">
+                                        <apex:repeat id="stepTypeRepeat" value="{!stepTypeLabels}" var="stepType">
+                                            <p id="{!stepType}" class="ui-widget-content">{!stepType}</p>
+                                        </apex:repeat>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <p id="note"> *Note: Context menu is available on canvas.</p>
+                </apex:outputPanel>
+
+                <c:VisualiserRaphael recordId="{!process}" name="Visualiser" id="raphaelVisualiser" />
+
+            </apex:panelGrid>
+        </apex:pageBlock>
+    </apex:form>
+    <apex:outputPanel id="scriptsDesigner" rendered="{!IF(onlyMove, false, true)}">
+        <script type="text/javascript" charset="utf-8">
+            j$(document).ready(
+                function(){
+                    Designer.graph = Visualiser.graph;
+                    Designer.toolbox = new Toolbox(Designer.graph);
+                    Designer.contextMenu = CanvasMenu;
+                    Designer.modalDialog = Form;
+                    var id = j$("#toolItems p.ui-state-active").attr('id');
+                    switch(id)
+                    {
+                        case "select":
+                            Designer.toolbox.enableSelector();
+                            break;
+                        case "drag":
+                            Designer.toolbox.enableDragging();
+                            break;
+                        case "connect":
+                            Designer.toolbox.enableConnector();
+                            break;
+                    }
+                    Designer.enableEdit();
+                    Designer.graph.onAfterDraw = Designer.attachCurrentTool;
+                }
+            );
+        </script>
+    </apex:outputPanel>
+
+    <apex:outputPanel id="scriptOnlyMove" rendered="{!IF(onlyMove, true, false)}" >
+        <script type="text/javascript" charset="utf-8">
+            j$(document).ready(
+                function(){
+                    Designer.graph = Visualiser.graph;
+                    Designer.toolbox = new Toolbox(Designer.graph);
+                    Designer.toolbox.enableDragging();
+                    Designer.graph.onAfterDraw = Designer.attachCurrentTool;
+                }
+            );
+        </script>
+    </apex:outputPanel>
+    <apex:outputPanel id="scriptsAttachHandlers" rendered="{!IF(onlyMove, false, true)}" >
+        <script type="text/javascript" charset="utf-8">
+        j$(document).ready(
+            function() {
+            	Designer.getStepRepresentation = function() {
+            		Visualforce.remoting.Manager.invokeAction(
+		    			'{!$RemoteAction.DesignerController.stepRepresentation}',
+		    			"{!process}", Designer.currentItemID, parseInt(Designer.posX), parseInt(Designer.posY), Designer.updateLayout,{escape: false}
+		    		);
+		    	};
+		    	Designer.getLinkRepresentation = function(){
+		    		Visualforce.remoting.Manager.invokeAction(
+				    	'{!$RemoteAction.DesignerController.linkRepresentation}',
+				    	"{!process}", Designer.currentItemID, parseInt(Designer.id1), parseInt(Designer.id2), Designer.updateLayout,{escape: false}
+				    );
+		    	}
+                j$( "#accordition" ).accordion({
+                    collapsible: true,
+                    autoHeight: false
+                });
+
+                j$("#toolItems p").mousedown(
+                    function() {
+                        j$(this).addClass("ui-state-active").siblings().removeClass("ui-state-active");
+                        if( j$(this).attr('id') == 'select' ) {
+                            Designer.enableSelector();
+                        }
+                        if( j$(this).attr('id') == 'drag' ) {
+                            Designer.enableDragger();
+                        }
+                        if( j$(this).attr('id') == 'connect' ) {
+                            Designer.enableConnector();
+                        }
+                    }
+                );
+                j$("#stepItems p").mousedown(
+                    function() {
+                        j$(this).addClass("ui-state-active").siblings().removeClass("ui-state-active");
+                    }
+                );
+
+                j$( "#stepItems p" ).draggable({
+                    appendTo: "body",
+                    helper: "clone",
+                    cursorAt: { left: 20, top: 30 }
+                });
+                j$( "#graphContainer" ).droppable({
+                    accept: "#stepItems p",
+                    drop: function( event, ui ) {
+                        Designer.addStep(
+                        	ui.draggable.context.id,
+                        	event.pageX - j$( "#graphContainer" ).offset().left + j$( "#graphContainer" ).scrollLeft() - 20,
+                        	event.pageY - j$( "#graphContainer" ).offset().top + j$( "#graphContainer" ).scrollTop() - 18
+                        );
+                    }
+                });
+				j$( "#graphContainer" ).click(
+					function(event){
+						var elem = Designer.graph.paper.getElementByPoint(event.clientX, event.clientY);
+						if (!elem) {
+							Designer.toolbox.deselectAll();
+						}
+					}
+				);
+            }
+        );
+    	</script>
+	</apex:outputPanel>
+</apex:component>

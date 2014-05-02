@@ -1,0 +1,64 @@
+<apex:page controller="CSPOFA.VisualiserController" id="VisualiserTemplate" >
+
+	<apex:includeScript id="jqueryInclude" value="{!URLFOR($Resource.CSPOFA__POFJQUERY)}"/>
+	<apex:includeScript id="jQUIGraphicsInclude" value="{!URLFOR($Resource.CSPOFA__POFJQUERYGRAPHICS)}"/>
+
+
+	<!-- jQuery UI -->
+	<apex:stylesheet id="jQCSS" value="{!URLFOR($Resource.CSPOFA__POFJQUERYUI,'css/cupertino/jquery-ui-1.8.20.custom.css')}"/>
+	<!-- for production -->
+	<apex:includeScript id="jqUIInclude" value="{!URLFOR($Resource.CSPOFA__POFJQUERYUI,'js/jquery-ui-1.8.20.custom.min.js')}"/>
+	<!---->
+	<!-- for development/debug --
+	<apex:includeScript value="{!URLFOR($Resource.POFJQUERYUI,'development-bundle/ui/jquery-ui-1.8.20.custom.js')}"/>
+	<!---->
+
+	<script type="text/javascript" charset="utf-8">
+	var j$ = jQuery.noConflict();
+	j$(document).ready(function(){
+		window.setup = function() {
+			if(typeof Designer !== 'undefined'){
+				Designer.initialize();
+			}
+		}
+	});
+	</script>
+
+	<body id="body">
+		<!----
+		<c:ModalDialog id="toogleMessage" name="Message" />
+		<apex:form id="toogleForm">
+			<apex:commandButton value="Toogle Designer/Visualiser" action="{!toogleit}" reRender="flows,toogleForm" style="float:left; margin-left:10px;" onclick="window.setup();" status="loading" oncomplete="Message.close();"/>
+			<apex:actionStatus id="loading" onstart="Message.info('Loading...')" onstop="" ></apex:actionStatus>
+		</apex:form>
+		<!---->
+		<div id="space" style="float:left; height:10px; width:100%;"></div>
+
+        <apex:outputPanel style="display:none;" id="dummy">
+        </apex:outputPanel>
+
+		<apex:outputPanel id="flows">
+
+			<apex:outputPanel id="flow0" style="{!IF(toogle = 0,'display:block;','display:none;')}" >
+
+				<c:DesignerRaphael id="designer" recordId="{!record}" onlyMove="{!onlyMove}" />
+
+			</apex:outputPanel>
+
+	        <apex:outputPanel id="flow1" style="{!IF(toogle = 1,'display:block;','display:none;')}" >
+		        <apex:pageBlock id="title" title="Orchestrator Visualiser">
+					<c:VisualiserArrowsAndBoxes id="AABVisualiser" recordId="{!record}" />
+					<apex:outputPanel id="script" rendered="{!rerenderAAB}">
+						<script type="text/javascript" charset="utf-8">
+							j$('pre.arrows-and-boxes').arrows_and_boxes();
+						</script>
+					</apex:outputPanel>
+				</apex:pageBlock>
+			</apex:outputPanel>
+
+
+		</apex:outputPanel>
+
+
+	</body>
+</apex:page>

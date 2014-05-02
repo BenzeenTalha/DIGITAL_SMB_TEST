@@ -1,0 +1,32 @@
+<apex:component >
+  <apex:attribute name="attr" type="cscfgc.Attribute" description="Attribute to render"/>
+  <apex:attribute name="rowClasses" type="String" description="CSS classes for row"/>
+  <apex:attribute name="required" type="Boolean" description="Is attribute required"/>
+  <apex:attribute name="errors" type="cscfgc.FieldMessage[]" description="Error messages" />
+  
+  <td class="dataCol attrWrapper {!rowClasses}">
+    <div class="{!if(required, 'requiredInput', '')}">
+        <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!required}" />
+        
+        <span class="dateInput dateOnlyInput">
+        <input id="{!attr.absoluteReference.asId}" 
+               name="{!attr.absoluteReference.asId}" 
+               onfocus="DatePicker.pickDate(false, '{!attr.absoluteReference.asId}', false );" 
+               size="12" 
+               type="text" class="cfgCtrl cfgAttr"
+               value="{!attr.value}"
+               onblur="CS.rules.evaluateAllRules()">
+        </input>
+               
+               <span class="dateFormat">
+                    [&nbsp;
+                    <a href="javascript:DatePicker.insertDate('{!LPAD(TEXT(DAY(TODAY())),2,'0')}/{!LPAD(TEXT(MONTH(TODAY())),2,'0')}/{!YEAR(TODAY())}', '{!attr.absoluteReference.asId}', true);" >{!LPAD(TEXT(DAY(TODAY())),2,'0')}/{!LPAD(TEXT(MONTH(TODAY())),2,'0')}/{!YEAR(TODAY())}</a>
+                    &nbsp;] </span>                                                        
+          </span>
+		<apex:outputText value="{!attr.propertiesAsHtml}" escape="false" />
+
+
+    </div>
+    <c:ErrorMessage errors="{!errors}" field="{!attr.absoluteReference.asId}" />
+  </td>
+</apex:component>

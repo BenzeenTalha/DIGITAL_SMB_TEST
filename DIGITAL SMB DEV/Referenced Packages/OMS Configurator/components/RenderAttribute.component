@@ -1,0 +1,30 @@
+<apex:component access="global">
+    <apex:attribute name="attr" type="cscfgc.Attribute" required="true" description="Attribute to render" access="global" />
+    <apex:attribute name="parentController" type="cscfgc.ProductConfiguratorController" required="false" description="Parent controller" />
+	<apex:attribute name="rowClasses" type="String" description="CSS classes for table cell in standard configuration screens"/>
+	<apex:attribute name="styleClass" type="String" description="CSS classes for visual control element" access="global"/>
+    <apex:attribute name="autoStyling" type="Boolean" default="true" description="If true, output in standard SFDC look and feel table with label and value" access="global" />
+
+	<apex:outputPanel layout="none" rendered="{!autoStyling && attr.definition.cscfgc__Type__c != 'Text Display'}">
+	    <td class="labelCol attrLabel first last {!if(attr.isRequired, 'requiredInput', '')} {!rowClasses} {!if(ISBLANK(attr.name) ||  (attr.definition.cscfgc__Type__c != 'User Input' && attr.definition.cscfgc__Type__c != 'Select List' && attr.definition.cscfgc__Type__c != 'Radio Button' && attr.definition.cscfgc__Type__c != 'Product Definition' && attr.definition.cscfgc__Type__c != 'Checkbox' && attr.definition.cscfgc__Type__c != 'Lookup'), 'empty', '' )}">
+	      <label for="{!attr.absoluteReference.asId}_wrapper">
+	          <apex:outputPanel styleClass="requiredMark" rendered="{!attr.isRequired}">*</apex:outputPanel>
+	          <apex:outputText escape="false" value="{!attr.label}" />
+	      </label>
+	    </td>
+	</apex:outputPanel>
+    
+    <c:Calculation attr="{!attr}" required="{!attr.isRequired}" rowClasses="first last" rendered="{!NOT(ISBLANK(attr.name)) && attr.definition.cscfgc__Type__c == 'Calculation'}" />
+    <c:Checkbox attr="{!attr}" autoStyling="{!autoStyling}" required="{!attr.isRequired}" rowClasses="first last" styleClass="{!styleClass}" rendered="{!NOT(ISBLANK(attr.name)) && attr.definition.cscfgc__Type__c == 'Checkbox'}" />
+    <c:Lookup attr="{!attr}" errors="{!parentController.validationErrors}" required="{!attr.isRequired}" rowClasses="first last" rendered="{!NOT(ISBLANK(attr.name)) && attr.definition.cscfgc__Type__c == 'Lookup'}" />
+    <c:RelatedProduct errors="{!parentController.validationErrors}" required="{!attr.isRequired}" parentController="{!parentController}" attr="{!attr}" rowClasses="first last" rendered="{!NOT(ISBLANK(attr.name)) && attr.definition.cscfgc__Type__c == 'Related Product'}" />
+    <c:SelectList attr="{!attr}" autoStyling="{!autoStyling}" errors="{!parentController.validationErrors}" required="{!attr.isRequired}" rowClasses="first last" styleClass="{!styleClass}" rendered="{!NOT(ISBLANK(attr.name)) && attr.definition.cscfgc__Type__c == 'Select List' && NOT(attr.definition.cscfgc__Enable_Predictive_Search__c)}" />
+    <c:PredictiveSelectList attr="{!attr}" autoStyling="{!autoStyling}" errors="{!parentController.validationErrors}" required="{!attr.isRequired}" rowClasses="first last" styleClass="{!styleClass}" rendered="{!NOT(ISBLANK(attr.name)) && attr.definition.cscfgc__Type__c == 'Select List' && attr.definition.cscfgc__Enable_Predictive_Search__c}" />
+    <c:RadioButton attr="{!attr}" autoStyling="{!autoStyling}" errors="{!parentController.validationErrors}" required="{!attr.isRequired}" rowClasses="first last" rendered="{!NOT(ISBLANK(attr.name)) && attr.definition.cscfgc__Type__c == 'Radio Button'}" />
+    <c:TextDisplay attr="{!attr}" required="{!attr.isRequired}" rowClasses="first last" rendered="{!NOT(ISBLANK(attr.name)) && attr.definition.cscfgc__Type__c == 'Text Display'}" />
+    <c:UserInput attr="{!attr}" autoStyling="{!autoStyling}" errors="{!parentController.validationErrors}" required="{!attr.isRequired}" rowClasses="first last" styleClass="{!styleClass}" rendered="{!NOT(ISBLANK(attr.name)) && attr.definition.cscfgc__Type__c == 'User Input'}" />
+ 	<c:DatePicker attr="{!attr}" errors="{!parentController.validationErrors}" required="{!attr.isRequired}" rowClasses="first last" rendered="{!NOT(ISBLANK(attr.name)) && attr.definition.cscfgc__Type__c == 'Date'}" />
+
+    <c:Empty attr="{!attr}" rowClasses="" rendered="{!ISBLANK(attr.name) ||  ISBLANK(attr.definition.cscfgc__Type__c) || (attr.definition.cscfgc__Type__c != 'User Input' && attr.definition.cscfgc__Type__c != 'Date' && attr.definition.cscfgc__Type__c != 'Select List' && attr.definition.cscfgc__Type__c != 'Radio Button' && attr.definition.cscfgc__Type__c != 'Related Product' && attr.definition.cscfgc__Type__c != 'Checkbox' && attr.definition.cscfgc__Type__c != 'Lookup' && attr.definition.cscfgc__Type__c != 'Calculation') && attr.definition.cscfgc__Type__c != 'Text Display'}" />
+    
+</apex:component>

@@ -1,0 +1,6 @@
+<apex:component controller="cscfgc.ButtonWrapperController">
+    <apex:componentBody >
+        <apex:variable var="buttonClass" value="{!buttonStyleClass}" />
+        <apex:variable var="buttonStyle" value="{!buttonStyle}" />
+    </apex:componentBody>
+</apex:component>

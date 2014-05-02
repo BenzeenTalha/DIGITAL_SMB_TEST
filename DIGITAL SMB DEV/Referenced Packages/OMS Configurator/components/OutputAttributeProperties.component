@@ -1,0 +1,25 @@
+<!-- This component is deprecated -->
+<apex:component access="global">
+    <apex:attribute name="attr" type="cscfgc.Attribute" required="true" description="The attribute" access="global"/>
+
+    <input type="hidden" id="{!attr.absoluteReference.asId}:_attrName" name="{!attr.absoluteReference.asId}:_attrName" value="{!attr.name}" onchange="CS.rules.evaluateAllRules()" />
+    <input type="hidden" id="{!attr.absoluteReference.asId}:_Index" name="{!attr.absoluteReference.asId}:_Index" value="{!attr.absoluteReference.last.index}" onchange="CS.rules.evaluateAllRules()" />
+    <input type="hidden" id="{!attr.absoluteReference.asId}:_BasePrice" name="{!attr.absoluteReference.asId}:_BasePrice" value="{!attr.definition.base_price__c}" onchange="CS.rules.evaluateAllRules()" />
+    <input type="hidden" id="{!attr.absoluteReference.asId}:_Price" name="{!attr.absoluteReference.asId}:_Price" value="{!attr.price}" onchange="CS.rules.evaluateAllRules()" />
+    <input type="hidden" id="{!attr.absoluteReference.asId}:_Active" name="{!attr.absoluteReference.asId}:_Active" value="{!attr.isActive}" onchange="CS.rules.evaluateAllRules()" />
+    <input type="hidden" id="{!attr.absoluteReference.asId}:_IsLineItem" name="{!attr.absoluteReference.asId}:_IsLineItem" value="{!attr.isLineItem}" onchange="CS.rules.evaluateAllRules()" />
+    <input type="hidden" id="{!attr.absoluteReference.asId}:_LineItemSequence" name="{!attr.absoluteReference.asId}:_LineItemSequence" value="{!attr.lineItemSequence}" onchange="CS.rules.evaluateAllRules()" />
+    <input type="hidden" id="{!attr.absoluteReference.asId}:_IsRequired" name="{!attr.absoluteReference.asId}:_IsRequired" value="{!attr.isRequired}" onchange="CS.rules.evaluateAllRules()" />
+
+	<apex:repeat var="field" value="{!attr.attributeFields}">
+		<input type="hidden" id="{!attr.absoluteReference.asId}:_{!field.name}" name="{!attr.absoluteReference.asId}:_{!field.name}" value="{!field.value__c}" onchange="CS.rules.evaluateAllRules()" />
+	</apex:repeat>
+	
+ 	<apex:outputPanel layout="none" rendered="{!attr.definition.cscfgc__Type__c == 'Calculation'}">
+		<script type="text/javascript">
+			CS.registerCalculation(function() {
+				CS.setCalculation('{!attr.absoluteReference.asId}', {!attr.expressionJavaScript}, true);
+			});
+		</script>
+	</apex:outputPanel>
+</apex:component>

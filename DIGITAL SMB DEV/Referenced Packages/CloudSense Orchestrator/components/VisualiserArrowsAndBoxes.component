@@ -1,0 +1,13 @@
+<apex:component id="componenetAABVisualiser" controller="CSPOFA.VisualiserArrowsAndBoxesController">
+	<apex:includeScript value="{!URLFOR($Resource.CSPOFA__POFARROWSANDBOXES)}"/>
+	<apex:stylesheet value="{!URLFOR($Resource.CSPOFA__POFARROWSANDBOXESCSS)}"/>
+
+	<apex:attribute id="attributeName" name="recordId" type="Id" required="true" assignTo="{!recordId}" description="Record that you want to visualize. Currently Orchestrator process and process templates are supported." ></apex:attribute>
+
+	<center>
+		<pre style="display:none;" class="arrows-and-boxes">
+			<apex:outputText id="outputAABFlow" value="{!ArrowsAndBoxesFlow}">
+			</apex:outputText>
+		</pre>
+	</center>
+</apex:component>

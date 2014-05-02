@@ -1,0 +1,47 @@
+<apex:component >
+	<apex:attribute name="rowClasses" type="String" required="true"
+		description="CSS classes for row" />
+	<apex:attribute name="attr" type="cscfgc.Attribute" required="true"
+		description="Attribute to render" />
+	<apex:attribute name="parentController"
+		type="cscfgc.ProductConfiguratorController" description="Parent controller" />
+	<apex:attribute name="required" type="Boolean"
+		description="Is attribute required" />
+	<apex:attribute name="errors" type="cscfgc.FieldMessage[]"
+		description="Error messages" />
+
+	<td class="dataCol attrWrapper {!rowClasses}">
+
+		<div class="{!if(required, 'requiredInput', '')}">
+			<div class="requiredBlock" />
+
+			<input type="hidden" id="{!attr.absoluteReference.asId}" name="{!attr.absoluteReference.asId}" value="{!attr.value}" onchange="CS.rules.evaluateAllRules()" />
+
+			<apex:outputPanel rendered="{!attr.relatedProductsCount == 0}">
+				<input type="text" id="{!attr.absoluteReference.asId}_Name" name="{!attr.absoluteReference.asId}_Name" value="" readonly="readonly" />
+				&nbsp; &nbsp;
+				<span id="{!attr.absoluteReference.asId}_ctrlButtons">
+					<a href="javascript:CS.executePreSubmissionTasks('jQuery(\'#relatedId\').val(\'{!attr.definition.id}\'); selectRelatedProduct()');">Add</a>
+				</span> <!-- span for add buttons end -->
+			</apex:outputPanel> 
+	
+			<apex:outputPanel rendered="{!attr.relatedProductsCount == 1}">
+				<apex:repeat var="product" value="{!attr.relatedProducts}" rows="1">
+				
+					<input type="text" id="{!attr.absoluteReference.asId}_Name" name="{!attr.absoluteReference.asId}_Name" value="{!product.name}" readonly="readonly" />
+					&nbsp; &nbsp;
+					<span id="{!attr.absoluteReference.asId}_ctrlButtons">             
+						<a href="javascript:CS.executePreSubmissionTasks('jQuery(\'#reference\').val(\'{!product.reference.asString}\'); updateAndSelectConfig()');">Edit</a>
+						&nbsp; | &nbsp;
+						<a href="javascript: jQuery('#attributeName').val('{!attr.name}'); jQuery('#idx').val('{!product.index}');removeRelatedProduct()">Del</a>
+					</span>
+					
+				</apex:repeat>
+			</apex:outputPanel>
+			<apex:outputText value="{!attr.propertiesAsHtml}" escape="false" />
+			
+		</div>
+		<c:ErrorMessage errors="{!errors}" field="{!attr.absoluteReference.asId}" />
+	</td>
+
+</apex:component>

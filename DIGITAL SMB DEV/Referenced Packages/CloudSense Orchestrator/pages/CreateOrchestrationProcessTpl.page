@@ -1,0 +1,17 @@
+<apex:page id="page" standardController="CSPOFA__Orchestration_Process_Template__c" Title="Create Orchestration Process Template line" extensions="CSPOFA.CreateOrchestrationProcessTplController" tabStyle="CSPOFA__Orchestration_Process_Template__c">
+    <apex:form id="form">
+        <apex:pageBlock id="pageblock" title="Create Orchestration Process Template">
+            <apex:pageMessages id="messages" />
+            <apex:pageBlockButtons id="blockButtons">
+                <apex:commandButton id="save" value="Save" action="{!save}"/>
+                <apex:commandButton id="cancel" value="Cancel" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+
+            <apex:pageBlockSection id="pageblocksection" columns="2" showHeader="False">
+                <apex:inputField id="type" value="{!CSPOFA__Orchestration_Process_Template__c.CSPOFA__Process_Type__c}"/>
+                <apex:inputField id="label" value="{!CSPOFA__Orchestration_Process_Template__c.CSPOFA__Process_Label__c}"/>
+                <apex:inputField id="profile" value="{!CSPOFA__Orchestration_Process_Template__c.CSPOFA__Associated_Profile__c}"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

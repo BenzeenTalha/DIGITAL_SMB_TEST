@@ -1,0 +1,73 @@
+<apex:page id="processDriver" controller="CSPOFA.ProcessDriverController">
+	<script type="text/javascript" charset="utf-8">
+		/*
+			Ajax call to controller in order to check if engine is running.
+		*/
+		if( typeof Orchestrator === 'undefined' ) {
+			Orchestrator = {}
+		}
+
+		Orchestrator.isEngineRunning = function(){
+			Visualforce.remoting.Manager.invokeAction(
+    			'{!$RemoteAction.ProcessDriverController.isEngineRunning}'
+				, Orchestrator.isEngineRunningCallback, {escape: false}
+			);
+		}
+
+		Orchestrator.isEngineRunningCallback = function(result,event){
+			if(event.status && result != null){
+				var id ="{!$Component.theForm.schedule}";
+				if(id){
+					var element = document.getElementById(id)
+					if(element){
+						element.innerHTML = '<p>'+ result +'</p>';
+						Orchestrator.submitEnabled = false;
+					}
+				}
+			}
+			else{
+				Orchestrator.submitDisabled = true;
+			}
+		}
+		Orchestrator.checkSubmit = function(){
+			return Orchestrator.submitDisabled;
+		}
+	</script>
+    <apex:form id="theForm" onsubmit="return Orchestrator.checkSubmit();">
+
+		<div id="message1">
+			<p id="line1">This page can be used to manually invoke the processing engine.</p>
+			<p id="line2">Additionally, while this page is left open, it can automatically poll the processing engine at the specified frequency.</p>
+		</div>
+
+    	<div id="runNowContainer">
+			<p id="runNow"><apex:commandButton value="Run Process Engine Once Now" id="runnow" action="{!runJobs}" /></p>
+    	</div>
+
+		<div id="poolEngineContainer">
+			<h3 id="message2">Poll process engine every 10 secs:</h3>
+			<apex:outputPanel id="lastInvocationInfo" layout="none" rendered="{!runJobsAutomatically}"><p id="lastInvocation">Last invocation: {!lastPoll}</p></apex:outputPanel>
+			<!-- <p><apex:outputLabel value="Poll frequency (secs)" /> <apex:inputText value="{!intervalSecs}" /></p> -->
+			<p id="pool"><apex:commandButton id="buttonPool" value="Poll Engine Automatically" action="{!startPolling}" /></p>
+		</div>
+
+        <apex:actionPoller action="{!runJobs}" interval="10" rendered="{!runJobsAutomatically}" rerender="theForm" id="theRefresher"/>
+
+		<div id="backgroundContainer">
+			<h3 id="message3">Start background scheduled processing:</h3>
+			<apex:outputPanel id="schedule" layout="inline" rendered="{!ISBLANK(scheduleMessage)}">
+				<p id="freqInfo">Frequency is set in the Orchestrator Constants custom settings ('Default queue run frequency').</p>
+				<p id="schedule"><apex:commandButton id="buttonSchedule" value="Schedule background processing" action="{!scheduleJob}" /></p>
+			</apex:outputPanel>
+			<apex:outputPanel id="scheduleMessage" layout="inline" rendered="{!NOT(ISBLANK(scheduleMessage))}">
+				<p id="message4">{!scheduleMessage}</p>
+			</apex:outputPanel>
+		</div>
+
+    </apex:form>
+    <script type="text/javascript" charset="utf-8">
+		(function() {
+				Orchestrator.isEngineRunning();
+			})();
+	</script>
+</apex:page>

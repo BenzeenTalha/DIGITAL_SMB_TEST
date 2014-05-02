@@ -1,0 +1,23 @@
+<apex:page standardController="Lead" extensions="bvdep.BvDLinkController" sidebar="false" action="{!CheckProductSelection}" >
+
+<apex:composition template="bvdep__BvDLinkTemplate">
+    
+    <apex:define name="updateicon">
+        <apex:outputLink target="_top" value="{!UpdateLink}"><img src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!Product.Category__c}/update.gif" border="0" id="updateImage" /></apex:outputLink>
+        <br/>
+        <span style="font-variant: small-caps; font-size:80%;" >update lead data</span>                  
+    </apex:define>
+
+    <apex:define name="additionalIcon1">
+        <apex:outputLink target="_top" value="{!OwnershipTreeLink}"><img src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!Product.Category__c}/ownership.gif" border="0" /></apex:outputLink>
+        <br/>
+        <span style="font-variant: small-caps; font-size:80%;">display the ownership tree</span>                                                  
+    </apex:define>
+
+    <apex:define name="linkback">
+        <b>Lead</b> <a href="/{!Lead.Id}"> {!Lead.Name} </a>
+    </apex:define>
+    
+    </apex:composition>
+
+</apex:page>

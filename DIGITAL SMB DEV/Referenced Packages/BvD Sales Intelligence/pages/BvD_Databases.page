@@ -1,0 +1,84 @@
+<apex:page controller="bvdep.ProductInstallerController">
+
+<apex:outputPanel rendered="{!IsInline}">
+
+<apex:pageBlock >
+<table> 
+    <tr height="30">
+        <td>No Database has been selected for BvD Sales Intelligence</td>
+    </tr>
+</table>    
+
+</apex:pageBlock>
+
+
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!IsFullPage}">
+
+<apex:pageBlock >
+Select the database from BvD that you want to use to complete the data in your Salesforce database
+<br/><br/>
+Please note that in order to verify and complete the data in your accounts, leads and contacts, your customer data
+will be exchanged with the application of your choice.
+
+</apex:pageBlock>
+
+
+<apex:pageBlock rendered="{!ShowWarning}">
+
+<div style="color:#F00000">
+Unable to connect the BvD servers. Please check that you have the url 'https://clientlogin.bvdep.com' configured under remote sites.
+You find this in the setup menu in the <i>Administrative setup</i> section under Security controls. If it is not configured you 
+can add a new entry with the name BvDCRMCallback and the url https://clientlogin.bvdep.com.
+</div>
+</apex:pageBlock>
+ 
+
+<apex:form >
+
+
+<apex:pageBlock id="DBListSelection" title="Databases available from BvD">
+
+    <apex:inputHidden id="DefaultSelection" value="{!CurrentDefault}"/>
+    <table>
+    <apex:repeat var="product" value="{!AvailableProducts}"  >
+        <tr height="40" valign="top">
+            <td width="50"><input type="radio" value="{!product.bvdep__Id__c}" id="radio_{!product.bvdep__Id__c}" name="DefaultProduct" onClick="SetDefault ('{!product.Id__c}');" /></td>
+            <td width="200"><img src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!product.ProductId__c}.gif" border="0" title="{!product.Name}" alt="{!product.Name}"  /></td>
+        </tr>
+    </apex:repeat>
+    <tr>
+        <td colspan="2"><apex:commandButton action="{!SaveDefault}" value="Set new default"/></td>
+    </tr>
+    </table>
+
+</apex:pageBlock>
+
+<script language="javascript">
+
+function SetDefault (value)
+{
+    var inputHidden = document.getElementById ("{!$Component.DBListSelection.DefaultSelection}");
+    inputHidden.value = value;
+}
+
+var radioForDefault = document.getElementById ("radio_" + "{!CurrentDefault}");
+radioForDefault.checked = true;
+
+
+</script>
+
+
+<apex:outputPanel rendered="{!NewDatabasesAvailable}">
+<br/>
+<apex:commandButton action="{!CheckForNewProducts}" value="Check for new databases"/>
+New databases have been added that allow linking with bvd. Click to include them in the above list.
+<br/>
+</apex:outputPanel>
+
+
+</apex:form>
+
+</apex:outputPanel>
+</apex:page>

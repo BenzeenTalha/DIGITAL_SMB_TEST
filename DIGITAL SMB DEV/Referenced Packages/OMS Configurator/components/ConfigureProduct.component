@@ -1,0 +1,545 @@
+<apex:component allowDML="true">
+    <apex:attribute name="parentController" type="cscfgc.ProductConfiguratorController" required="true" description="Page controller" />
+
+    <c:FixUIStyles />
+
+    <apex:form id="frmConfigurator" >
+        <apex:actionFunction action="{!parentController.skipInterstitialConfiguration}" name="skipInterstitialConfiguration" />
+        <apex:actionFunction action="{!parentController.selectRelatedProduct}" name="selectRelatedProduct" immediate="true" />
+        <apex:actionFunction action="{!parentController.updateAndSelectConfig}" name="updateAndSelectConfig" immediate="true" />
+        <apex:actionFunction action="{!parentController.copyAndSelectNewConfig}" name="copyAndSelectNewConfig" immediate="true" />
+        <apex:actionFunction action="{!parentController.removeRelatedProduct}" name="removeRelatedProduct" immediate="true" />
+        <input type="hidden" name="relatedId" id="relatedId" value="" />
+        <input type="hidden" name="reference" id="reference" value="" />
+        <input type="hidden" name="attributeName" id="attributeName" value="" />
+        <input type="hidden" name="idx" id="idx" value="" />
+
+
+        <c:PageHeader parentController="{!parentController}" />
+
+        <apex:pageMessages />
+
+        <c:ValidationMessage message="{!parentController.config.sObject.cscfgc__Validation_Message__c}" />
+
+        <div class="message warningM3" style="{!if (isblank(parentCOntroller.config.compatibilityWarning), 'display: none', '')}">
+            <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                <tr valign="top">
+                    <td>
+                        <img alt="WARNING" class="msgIcon" src="/s.gif" title="WARNING" />
+                    </td>
+                    <td class="messageCell">
+                        <div class="messageText">
+                            <h4>Warning:</h4>
+                            <span id="CSValidationMessage">{!parentCOntroller.config.compatibilityWarning}</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="message infoM3" style="{!IF(parentController.isInterstitialConfiguration, '', 'display:none')}">
+            <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px; margin:0px;">
+                <tr valign="top">
+                    <td>
+                        <img alt="INFO" class="msgIcon" src="/s.gif" title="INFO" />
+                    </td>
+                    <td class="messageCell">
+                        <div class="messageText">
+                            The product you have chosen requires the following shared top-level configuration information. You can complete this now or skip this stage and complete it later from the configuration summary screen.
+                            <a href="#" onclick="skipInterstitialConfiguration(); return false">Skip</a> 
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+
+        <div id="CSInfoMessageBox" class="message infoM3" style="display: none">
+            <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                <tr valign="top">
+                    <td>
+                        <img alt="INFO" class="msgIcon" src="/s.gif" title="INFO" />
+                    </td>
+                    <td class="messageCell">
+                        <div class="messageText">
+                            <div id="CSInfoMessage"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+
+        <!--
+        ################################################
+        # Dummy input date field to enable hand-rolled
+        # date pickers to be built dynamically. Adding
+        # this control forces SF to build the DatePicker
+        # table at the end of the page containing the 
+        # content for the datepicker div.
+        ################################################
+        -->
+        <div style="display:none">
+            <apex:inputfield id="dummy"  value="{!parentController.config.sObject.cscfgc__Entry_Date__c}" />
+        </div>
+
+        <apex:pageBlock title="{!parentController.config.productDefinition.name}">
+            <apex:pageBlockButtons >
+                <c:ButtonWrapper >
+                    <apex:commandLink action="{!parentController.selectScreen}" value="Previous"
+                        rendered="{!parentController.config.currentScreen.index__c > 0}"
+                        styleClass="{!buttonClass}" style="{!buttonStyle}"
+                        onclick="CS.executePreSubmissionTasks(); "
+                        >
+                        <apex:param name="screenIndex"
+                            assignTo="{!parentController.screenIndex}"
+                            value="{!parentController.config.currentScreen.cscfgc__Index__c - 1}" />
+                    </apex:commandLink>
+                </c:ButtonWrapper>
+                &nbsp; &nbsp;
+                <c:ButtonWrapper >
+                    <apex:commandLink action="{!parentController.selectScreen}" value="Next"
+                        rendered="{!parentController.config.lastScreen.cscfgc__Index__c != parentController.config.currentScreen.cscfgc__Index__c}"
+                        styleClass="{!buttonClass}" style="{!buttonStyle}"
+                        onclick="javascript:CS.executePreSubmissionTasks(); ">
+                        <apex:param name="screenIndex"
+                            assignTo="{!parentController.screenIndex}"
+                            value="{!parentController.config.currentScreen.cscfgc__Index__c + 1}" />
+                    </apex:commandLink>
+                </c:ButtonWrapper>
+                &nbsp; &nbsp;
+                <apex:outputPanel layout="inline" style="display: none" rendered="{!parentController.logToBrowser}">
+                    config.reference: {!parentController.config.reference.asId}
+                    rootConfig.reference: {!parentController.rootConfig.reference.asId} 
+                    parentController.config.reference == '' {!parentController.config.reference.asId == ''}
+                    parentController.config == parentController.rootConfig: {!parentController.config == parentController.rootConfig}
+                    parentController.config.reference.asId == parentController.rootConfig.reference.asId: {!parentController.config.reference.asId == parentController.rootConfig.reference.asId}
+                </apex:outputPanel>
+                <c:ButtonWrapper rendered="{!parentController.config.reference.asId == parentController.rootConfig.reference.asId && (parentController.config.lastScreen.cscfgc__Index__c == parentController.config.currentScreen.cscfgc__Index__c || parentController.config.productDefinition.cscfgc__Allow_progress_from_incomplete_screens__c)}">
+                    <span class="CSRefreshButton" style="display: none">
+                        <apex:commandLink action="{!parentController.refreshScreen}" value="Refresh"
+                            onclick="javascript:CS.executePreSubmissionTasks();"
+                            styleClass="{!buttonClass}" style="{!buttonStyle}" />
+                    </span>
+                    <span class="CSFinishButton">
+                        <apex:commandLink id="CSFinishButton" action="{!parentController.saveAndFinish}" rendered="{!not(parentController.isInterstitialConfiguration)}"
+                            value="{!If(!parentController.configIsValid && parentController.userErrorsWarned && parentController.config.productDefinition.cscfgc__Allow_progress_from_incomplete_screens__c,'Save without Validation','Finish')}"
+                            onclick="if (this.wasClicked) return false; this.wasClicked = true; CS.executePreSubmissionTasks();"
+                            styleClass="{!buttonClass}" style="{!buttonStyle}" />
+                            
+                        <apex:commandLink action="{!parentController.saveAndFinish}" rendered="{!parentController.isInterstitialConfiguration}"
+                            value="{!If(!parentController.configIsValid && parentController.userErrorsWarned && parentController.config.productDefinition.cscfgc__Allow_progress_from_incomplete_screens__c,'Continue anyway','Continue')}"
+                            onclick="if (this.wasClicked) return false; this.wasClicked = true; CS.executePreSubmissionTasks();"
+                            styleClass="{!buttonClass}" style="{!buttonStyle}" />
+                    </span>
+                    <span class="CSFinishButton">
+                        <apex:commandLink action="{!parentController.validateSaveAndFinish}"
+                            value="Validate and Save"
+                            rendered="{! !parentController.configIsValid && parentController.userErrorsWarned && parentController.config.productDefinition.Allow_progress_from_incomplete_screens__c}"
+                            onclick="if (this.wasClicked) return false; this.wasClicked = true; CS.rules.evaluateAllRules()"
+                            styleClass="{!buttonClass}" style="{!buttonStyle}" />
+
+                    </span>
+                </c:ButtonWrapper>
+                <c:ButtonWrapper rendered="{!not(parentController.isInterstitialConfiguration) && parentController.config.lastScreen.cscfgc__Index__c == parentController.config.currentScreen.cscfgc__Index__c && parentController.config.reference.asId != parentController.rootConfig.reference.asId}">
+                    <span class="CSRefreshButton" style="display: none">
+                        <apex:commandLink action="{!parentController.refreshScreen}" value="Refresh"
+                            onclick="javascript:CS.executePreSubmissionTasks();"
+                            styleClass="{!buttonClass}" style="{!buttonStyle}" />
+                    </span>
+                    <span class="CSFinishButton">
+                        <apex:commandLink action="{!parentController.updateValidateAndSelectConfig}" value="Continue"
+                            onclick="jQuery('#reference').val('{!parentController.config.parent.reference.asString}'); CS.executePreSubmissionTasks();"
+                            styleClass="{!buttonClass}" style="{!buttonStyle}">
+                            <apex:param name="reference"
+                                assignTo="{!parentController.reference}"
+                                value="{!parentController.config.parent.reference.asString}" />
+                        </apex:commandLink>
+                    </span>
+                </c:ButtonWrapper>
+                &nbsp; &nbsp;
+                <c:ButtonWrapper >
+                    <apex:commandLink action="{!parentController.cancel}" value="Cancel"
+                            onclick="javascript:CS.executePreSubmissionTasks();"
+                            styleClass="{!buttonClass}" style="{!buttonStyle}" />
+                </c:ButtonWrapper>
+                &nbsp; &nbsp; &nbsp;
+
+                <apex:repeat var="button"
+                    value="{!parentController.config.buttons}">
+                    <c:ButtonWrapper >
+                        <apex:commandLink onclick="CS.rules.evaluateAllRules(); openCalloutWindow('{!button.cscfgc__Page__c}')"
+                            styleClass="{!buttonClass}" style="{!buttonStyle}">
+                            {!button.name}
+                        </apex:commandLink>
+                    </c:ButtonWrapper>
+                    &nbsp; &nbsp;
+                </apex:repeat>
+
+            </apex:pageBlockButtons>
+
+            <apex:pageBlockSection title="General Information" columns="2" rendered="{!parentController.showGeneralInformation}">
+                <apex:pageBlockSectionItem rendered="{!parentController.currentScreen.cscfgc__Show_Configuration_and_Product_Name__c}">
+                    <apex:outputLabel value="Configuration Name"
+                        for="{!parentController.config.reference.asId}:_configname" />
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                        <apex:outputPanel rendered="{!parentController.config.productDefinition.cscfgc__Name_Is_Read_Only__c}">
+                            <input type="text"
+                                id="{!parentController.config.reference.asId}:_configname"
+                                name="{!parentController.config.reference.asId}:_configname"
+                                required="true" value="{!parentController.config.sobject.name}"
+                                readonly="readonly" />
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!not(parentController.config.productDefinition.cscfgc__Name_Is_Read_Only__c)}">
+                            <div class="requiredBlock" /><input type="text"
+                                id="{!parentController.config.reference.asId}:_configname"
+                                name="{!parentController.config.reference.asId}:_configname"
+                                required="true" value="{!parentController.config.sobject.name}" />
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!parentController.currentScreen.cscfgc__Show_Configuration_and_Product_Name__c}">
+                    <apex:outputLabel value="Product" for="config_definition_name" />
+                    <apex:outputText id="config_definition_name"
+                        value="{!parentController.config.productDefinition.name}" />
+                </apex:pageBlockSectionItem>
+                <apex:repeat var="section" value="{!parentController.screenSections}"
+                    rows="1">
+                    <apex:repeat var="row" value="{!section.rows}"
+                        rendered="{!section.numRows > 0}">
+                                <tr>
+                                    <c:RenderAttribute parentController="{!parentController}"
+                                        attr="{!row.first}" />
+                                    <c:RenderAttribute parentController="{!parentController}"
+                                        attr="{!row.second}" rendered="{!row.first.definition.cscfgc__Column_Span__c != 2}"/>
+                                </tr>
+                    </apex:repeat>
+                </apex:repeat>
+            </apex:pageBlockSection>
+
+            <apex:repeat var="section" value="{!parentController.screenSections}"
+                first="1">
+                <div class="pbSubheader tertiaryPalette"><img src="/s.gif"
+                    alt="Hide Section - {!section.name}" class="hideListButton"
+                    id="img_j_id0:j_id41:j_id42:j_id43:j_id69:j_id80"
+                    name="General Information" onclick="twistSection(this);"
+                    style="cursor: pointer;" title="Hide Section - {!section.name}" />
+                <h3>{!section.name}</h3>
+                </div>
+                <apex:repeat var="row" value="{!section.rows}">
+                    <div class="pbSubsection bEditBlock">
+                    <table class="detailList" border="0" cellspacing="0"
+                        cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <c:RenderAttribute parentController="{!parentController}"
+                                    attr="{!row.first}" />
+                                <c:RenderAttribute parentController="{!parentController}"
+                                    attr="{!row.second}" rendered="{!row.first.definition.cscfgc__Column_Span__c != 2}"/>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- .detailList --></div>
+                    <!-- .pbSubsection -->
+                </apex:repeat>
+            </apex:repeat>
+
+            <apex:outputPanel layout="none" rendered="{!NOT(parentController.showGeneralInformation) || NOT(parentController.currentScreen.cscfgc__Show_Configuration_and_Product_Name__c)}">
+                <input type="hidden"
+                    id="{!parentController.config.reference.asId}:_configname"
+                    name="{!parentController.config.reference.asId}:_configname"
+                    value="{!parentController.config.sobject.name}"/>
+            </apex:outputPanel>
+            
+            <input type="hidden" id="{!parentController.config.reference.asId}:_attrname"
+                    name="{!parentController.config.reference.asId}:_attrname" value="{!parentController.config.attributeName}" />
+
+            <input type="hidden" id="{!parentController.config.reference.asId}:_index"
+                    name="{!parentController.config.reference.asId}:_index" value="{!parentController.config.index}" />
+
+            <input type="hidden" id="{!parentController.config.reference.asId}:_product"
+                    name="{!parentController.config.reference.asId}:_product" value="{!parentController.config.productDefinition.name}" />
+
+            <input type="hidden" id="{!parentController.config.reference.asId}:_recurrence"
+                    name="{!parentController.config.reference.asId}:_recurrence" value="{!parentController.config.sObject.recurrence_frequency__c}" />
+
+            <input type="hidden" id="{!parentController.config.reference.asId}:_billingfrequency"
+                    name="{!parentController.config.reference.asId}:_billingFrequency" value="{!parentController.config.sObject.billing_frequency__c}" />
+
+
+            <input type="hidden" id="{!parentController.config.reference.asId}:_status"
+                    name="{!parentController.config.reference.asId}:_status" value="{!parentController.config.sObject.configuration_status__c}" />
+
+            <input type="hidden" id="{!parentController.config.reference.asId}:_validationmessage"
+                    name="{!parentController.config.reference.asId}:_validationmessage" value="{!parentController.config.sObject.cscfgc__Validation_Message__c}" />
+
+            <input type="hidden" id="{!parentController.config.reference.asId}:_contractterm"
+                    name="{!parentController.config.reference.asId}:_contractterm" value="{!parentController.config.sObject.Contract_Term__c}" />
+
+            <input type="hidden" id="{!parentController.config.reference.asId}:_contracttermperiod"
+                    name="{!parentController.config.reference.asId}:_contracttermperiod" value="{!parentController.config.sObject.Contract_Term_Period__c}" />
+        </apex:pageBlock>
+
+         <apex:repeat var="list" value="{!parentController.relatedLists}">
+            <!-- Quick Entry Grid -->        
+            <apex:outputPanel layout="none" rendered="{!list.isQuickEntry}">
+                
+                <apex:pageBlock title="{!list.name}">
+                   <apex:pageBlockButtons location="top">
+                       <c:ButtonWrapper >
+                           <apex:commandLink action="{!parentController.selectRelatedProduct}"
+                               styleClass="{!buttonClass}" style="{!buttonStyle}" onclick="console.log('new row'); return false">
+                               New {!list.name}
+                           </apex:commandLink>
+                       </c:ButtonWrapper>
+                    </apex:pageBlockButtons>
+                    <div class="pbSubsection">
+                        <table class="detailList" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td>
+                                    <table class="list" border="0" cellspacing="0" cellpadding="0">
+                                        <thead class="rich-table-thead">
+                                            <tr class="headerRow">
+                                                <apex:repeat var="col" value="{!list.attributes}">
+                                                    <th>{!col.name}</th>
+                                                </apex:repeat>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                </apex:pageBlock>
+            </apex:outputPanel>
+
+            <!-- Related Lists (Related Products or Multi-Select Lookups-->
+            <apex:outputPanel layout="none" rendered="{!not(list.isQuickEntry)}">
+                <apex:repeat var="row" value="{!list.rows}" rows="1">
+    
+                    <apex:pageBlock title="{!list.name}">
+                        <apex:pageBlockButtons location="top">
+                            <c:ButtonWrapper >
+                                <apex:outputPanel layout="none" rendered="{!row.first.definition.cscfgc__Type__c == 'Related Product'}">
+                                    <a href="javascript:CS.executePreSubmissionTasks(); jQuery('#relatedId').val('{!row.first.definition.id}');selectRelatedProduct();"
+                                            class="{!buttonClass}" style="{!buttonStyle}">New {!row.first.name}</a>
+                                </apex:outputPanel>
+                                <apex:outputPanel layout="none" rendered="{!row.first.definition.cscfgc__Type__c == 'Lookup'}">
+                                    <a href="javascript: void openLookupWindow('{!row.first.absoluteReference.asId}', '{!row.first.definition.lookup_config__c}', '{!row.first.DynamicLookupFilters}', 800, CS.getAttributeValue('{!row.first.absoluteReference.asId}'))"
+                                            class="{!buttonClass}" style="{!buttonStyle}">New {!row.first.name}</a>
+                                </apex:outputPanel>
+                                <input type="hidden" id="{!row.first.absoluteReference.asId}_Name" value="" />
+                            </c:ButtonWrapper>
+                        </apex:pageBlockButtons>
+    
+                        <apex:pageBlockTable id="lookupTable" var="record" value="{!row.first.prototypeLookup}" rendered="{!row.first.definition.cscfgc__Type__c == 'Lookup'}" style="display:none;">
+                            <apex:column >
+                                <apex:facet name="header">Action</apex:facet>
+                                <b><a class='delAction' href="#" onclick="CS.removeLookupRecord('{!row.first.absoluteReference.asId}', this); CS.rules.evaluateAllRules(); return false">Del</a></b>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">Name</apex:facet>
+                                <span class="name"></span>
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 0}">
+                                <apex:facet name="header">{!list.colHeader1}</apex:facet>
+                                <span class="col" data-col-idx="1">{!list.colHeader1}</span>
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 1}">
+                                <apex:facet name="header">{!list.colHeader2}</apex:facet>
+                                <span class="col" data-col-idx="2">{!list.colHeader2}</span>
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 2}">
+                                <apex:facet name="header">{!list.colHeader3}</apex:facet>
+                                <span class="col" data-col-idx="3">{!list.colHeader3}</span>
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 3}">
+                                <apex:facet name="header">{!list.colHeader4}</apex:facet>
+                                <span class="col" data-col-idx="4">{!list.colHeader4}</span>
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 4}">
+                                <apex:facet name="header">{!list.colHeader5}</apex:facet>
+                                <span class="col" data-col-idx="5">{!list.colHeader5}</span>
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 5}">
+                                <apex:facet name="header">{!list.colHeader6}</apex:facet>
+                                <span class="col" data-col-idx="6">{!list.colHeader6}</span>
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 6}">
+                                <apex:facet name="header">{!list.colHeader7}</apex:facet>
+                                <span class="col" data-col-idx="7">{!list.colHeader7}</span>
+                            </apex:column>
+                        </apex:pageBlockTable>
+                        
+                        <apex:outputPanel rendered="{!row.first.definition.cscfgc__Type__c == 'Lookup'}">
+                            <script type="text/javascript">
+                                CS.initMultiLookup({
+                                    lookupId: '{!row.first.absoluteReference.asId}',
+                                    tableId: '{!$Component.lookupTable}',
+                                    maxRows: '{!row.first.definition.cscfgc__Max__c}',
+                                    records: {!row.first.lookupRecordsAsJSON},
+                                    columnMap: {!row.first.lookupColumnsMap}
+                                });
+                            </script>
+                        </apex:outputPanel>
+
+                        <apex:pageBlockTable var="product" value="{!row.first.relatedProducts}" rendered="{!row.first.definition.cscfgc__Type__c == 'Related Product'}">
+                            <apex:column >
+                                <apex:facet name="header">Action</apex:facet>
+                                <b><a href="javascript:CS.executePreSubmissionTasks(); jQuery('#reference').val('{!product.reference.asString}');updateAndSelectConfig();">Edit</a></b>
+                                |
+                                <b><a href="javascript:CS.executePreSubmissionTasks(); jQuery('#reference').val('{!product.reference.asString}'); jQuery('#relatedId').val('{!row.first.definition.id}'); copyAndSelectNewConfig();">Copy</a></b>
+                                |
+                                <b><a href="javascript:CS.executePreSubmissionTasks(); jQuery('#attributeName').val('{!row.first.name}'); jQuery('#idx').val('{!product.index}'); removeRelatedProduct();">Del</a></b>
+                            </apex:column>
+                            <apex:column >
+                                <apex:facet name="header">{!list.name} Name</apex:facet>
+                                <a href="javascript: CS.executePreSubmissionTasks(); jQuery('#reference').val('{!product.reference.asString}');updateAndSelectConfig()">{!product.name}</a>
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 0}">
+                                <apex:facet name="header">{!list.colHeader1}</apex:facet>
+                                {!product.col1}
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 1}">
+                                <apex:facet name="header">{!list.colHeader2}</apex:facet>
+                                {!product.col2}
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 2}">
+                                <apex:facet name="header">{!list.colHeader3}</apex:facet>
+                                {!product.col3}
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 3}">
+                                <apex:facet name="header">{!list.colHeader4}</apex:facet>
+                                {!product.col4}
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 4}">
+                                <apex:facet name="header">{!list.colHeader5}</apex:facet>
+                                {!product.col5}
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 5}">
+                                <apex:facet name="header">{!list.colHeader6}</apex:facet>
+                                {!product.col6}
+                            </apex:column>
+                            <apex:column rendered="{!list.numRelatedListCols > 6}">
+                                <apex:facet name="header">{!list.colHeader7}</apex:facet>
+                                {!product.col7}
+                            </apex:column>
+                        </apex:pageBlockTable>
+                    </apex:pageBlock>
+                </apex:repeat>
+            </apex:outputPanel>
+            
+        </apex:repeat>
+        
+        <apex:outputText value="{!parentController.hiddenAttributesAsHtml}" escape="false" />
+        
+        <apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(parentController.rootConfig.sharedContextConfig))}">
+            <apex:variable var="ctx" value="{!parentController.rootConfig.sharedContextConfig}" />
+            <input type="hidden" id="{!ctx.reference.asId}:_configname"
+                name="{!ctx.reference.asId}:_configname" value="{!ctx.sobject.name}"/>
+            
+            <input type="hidden" id="{!ctx.reference.asId}:_product"
+                    name="{!ctx.reference.asId}:_product" value="{!ctx.productDefinition.name}" />
+
+            <input type="hidden" id="{!ctx.reference.asId}:_status"
+                    name="{!ctx.reference.asId}:_status" value="{!ctx.sObject.configuration_status__c}" />
+            
+            <apex:outputText value="{!ctx.allAttributesAsHtml}" escape="false" />
+            
+        </apex:outputPanel>
+
+        <script type="text/javascript">
+            var popup,
+                currentLookupId;
+            
+            jQuery(document).ready(function() {
+                setTimeout(CS.rules.evaluateAllRules, 250);
+            });
+            
+            jQuery(window).focus(function() {
+                closePopup();
+            });
+
+            function openLookupWindow(id, lookupId, dynamicValueAttributes, width, excludeIds) {
+                closePopup();
+                currentLookupId = id;
+                
+                //#
+                //# Dynamic filter from JQuery
+                //#
+                var nameIdPairs;
+                var nameValuePairs;
+                var dynamicFilterParams = '';
+                if (dynamicValueAttributes)
+                {
+                    nameIdPairs = dynamicValueAttributes.split(',');
+                    for (i = 0 ; i < nameIdPairs.length ; i++)
+                    {
+                        var oneNameIdPair = nameIdPairs[i].split('|');
+                        if (dynamicFilterParams != '') dynamicFilterParams += '|';          
+                        dynamicFilterParams +=  oneNameIdPair[0] + '=' + jQuery(CS.getId(oneNameIdPair[1])).val(); 
+                        
+                    } 
+                     
+                }               
+                
+                var field = jQuery(CS.getId(id+'_Name'));
+                popup = window.open('{!parentController.lookupPageUrl}?lookupId=' + lookupId + '&searchValue=' + field.val() + '&productDefinitionId={!parentController.config.productDefinition}' +  '&attributeValues=' + CS.urlEncode(dynamicFilterParams) + '&excludeIds=' + CS.urlEncode(excludeIds ? excludeIds : ''), 'CSlookup', 'width=800, height=480, scrollbars=yes, toolbar=no, location=no, status=no, menubar=no');
+            }
+            
+            function openCalloutWindow(url, id, params, width) {
+                closePopup();
+                popup = window.open(url, 'callout', 'width=800, height=480, scrollbars=yes, toolbar=no, location=no, status=no, menubar=no');
+            }
+            
+            function closePopup() {
+                if (popup) {
+                    var tmp = popup;
+                    popup = null;
+                    tmp.close();
+                }
+            }
+            
+            function lookupSelect(id, name, data) {
+                // copy data so IE does not lose the reference when the window closes
+                var localData = {},
+                    multiSelectLookup = CS.multiSelectLookups[currentLookupId];
+                
+                for (key in data) localData[key] = data[key];
+                                
+                if (!multiSelectLookup) {
+                    jQuery(CS.getId(currentLookupId+'_Name')).val(name);
+                    jQuery(CS.getId(currentLookupId)).val(id).data(CS.LOOKUP_DATA, localData);
+                } else {
+                    CS.addLookupRecord(currentLookupId, localData);
+                    CS.updateMultiSelectLookupDisplay(currentLookupId);
+                }
+                CS.rules.evaluateAllRules();
+            }
+
+        </script>
+
+        <c:OutputRulesScript /> <!-- parentController="{!parentController}" / -->
+        <script type="text/javascript"> $j(".chzn-select").chosen(); $j(".chzn-select-deselect").chosen({allow_single_deselect:true}); </script>
+        
+        
+    </apex:form>
+
+     
+     
+
+</apex:component>

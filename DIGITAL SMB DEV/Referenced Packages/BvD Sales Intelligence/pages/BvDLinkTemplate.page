@@ -1,0 +1,188 @@
+<apex:page controller="bvdep.BvDLinkController"  >
+
+
+<apex:form >
+
+<c:APIParameterInitialization ApiServiceUrl="{!$Api.Partner_Server_URL_260}" />
+
+<apex:outputPanel rendered="{!IsInline}" id="links">
+
+<script type="text/javascript">
+
+function GetStateScript() {
+    // used to be apex ajax mechanism, but like this we skip 2 calls to salesforce servers, fetch the result from bvd directly and do the logic in javascript
+    var request = "{!CallBackJSUrl}" + "&ts=" + new Date().getTime();   
+    var head = document.getElementsByTagName("head").item(0);
+    var script = document.createElement("script");
+    script.setAttribute("type", "text/javascript");
+    script.setAttribute("src", request);
+    head.appendChild(script);   
+}
+
+function UpdateWithState (state) {
+
+    var pnl = document.getElementById ("pnlLoadingImage");
+    if (pnl != null)
+        pnl.style.display = 'none';
+        
+    var showlinks = false;
+    if (state == "NotMapped")
+        pnl = document.getElementById ("pnlSearchRequired");
+    else if (state == "Error")
+        pnl = document.getElementById ("pnlError");
+    else if (state == "NotAuthenticated")
+        pnl = document.getElementById ("pnlNotAuthenticated");
+    else 
+    {
+        pnl = document.getElementById ("pnlLinks");
+        showlinks = true;
+    }
+    
+    if (pnl != null)
+        pnl.style.display = 'inline-block';
+            
+    if (showlinks)
+    {
+        if (pnl != null)
+            pnl.style.display = 'inline-block';
+        
+        if (state == "UpToDate")
+        {
+            pnl = document.getElementById ("{!$Component.updatelinkgreyedpnl}");
+            if (pnl != null)
+                pnl.style.display = 'inline-block';     
+        }
+        else
+        {
+            pnl = document.getElementById ("{!$Component.updatelinkpnl}");
+            if (pnl != null)
+                pnl.style.display = 'inline-block';
+                
+            var img = document.getElementById ("updateImage");
+            if (state == "Conflicts")
+                img.title = '{!ConflictStatusTooltip}'
+            else
+                img.title = '{!AdditionalDataStatusTooltip}'
+                
+        }
+    
+    }
+
+}
+
+GetStateScript();
+
+</script>
+
+
+<div class="bPageBlock bDetailBlock" style="padding:0;margin:0;border:0" id="ep">
+    <div class="pbBody" style="padding:0;margin:0">
+
+
+    <table height="60">
+        <tr>
+            <td valign="top" width="50" >
+                
+                <img border="0" title="{!product.Name}" src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!Product.ProductId__c}Small.gif" />
+            </td>
+            <td align="center" valign="middle" width="100%">
+                <div id="pnlLoadingImage">
+                <table width="100%" align="left" >
+                    <tr>
+                        <td width="50"><img src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!Product.Category__c}/loading.gif" border="0" /></td>
+                        <td align="left"><span style="font-size:80%;">checking for updates ...</span></td>
+                    </tr>
+                </table>
+                </div>
+                <span id="pnlSearchRequired" style="display:none">
+                Your {!TypeLabel} is not mapped to a {!BvDEntityType} in {!product.Name}. 
+                <br />
+                Click&nbsp;<apex:outputLink target="_top" value="{!UpdateLink}">here</apex:outputLink> to search for this  {!TypeLabel} in {!product.Name}.                         
+                </span>
+                <span id="pnlNotAuthenticated" style="display:none">
+                Your account is not authenticated for {!product.Name}.  
+                <br />
+                Click&nbsp;<apex:outputLink target="_top" value="{!UpdateLink}">here</apex:outputLink> to connect to {!product.Name}.                           
+                </span>
+                <span id="pnlError" style="display:none">
+                The update status of your {!TypeLabel} could not be determined. The field mapping for {! TypePluralLabel} may not be correct. Contact your administrator  
+                </span>
+                <div id="pnlLinks"  style="display:none; width:100%" >
+                
+                <table width="100%" >
+                    <tr>
+                        <td align="center" valign="bottom">
+                            <apex:outputpanel id="updatelinkpnl" rendered="{!AllowUpdate}" style="display:none">
+                                <apex:insert name="updateicon" />            
+                            </apex:outputpanel> 
+                            <apex:outputPanel id="updatelinkgreyedpnl" rendered="{!AllowUpdate}" style="display:none">
+                                <img src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!Product.Category__c}/update_greyed.gif" border="0" />                  
+                                <br/>
+                                <span style="font-variant: small-caps; font-size:80%;">the {!TypeLabel} is up to date</span>                                    
+                            </apex:outputPanel>                                             
+                        </td>
+                        <td align="center" valign="top">
+                            <div id="pnlViewtheReport"  >
+                            <apex:outputLink target="_top" value="{!StandardReportLink}"><img src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!Product.Category__c}/report.gif" border="0"  /></apex:outputLink>
+                            <br/>
+                            <span style="font-variant: small-caps; font-size:80%;">display the {! ReportName} report</span>
+                            </div>                                                                          
+                        </td>
+                        <td align="center" valign="top">
+                            <apex:insert name="additionalIcon1" />            
+                        </td>
+                        <td align="center" valign="top">
+                            <apex:insert name="additionalIcon2" />            
+                        </td>
+                        <td align="center" valign="bottom">
+                            <apex:outputpanel id="removeLinkPnl" rendered="{!AllowRemoveLink}" >
+                            <apex:outputLink target="_top" value="{!RemoveLinkLink}"><img src="https://clientlogin.bvdep.com/CRMInteraction/Images/delete_link.png" border="0"  /></apex:outputLink>
+                            <br/>
+                            <span style="font-variant: small-caps; font-size:80%;">remove the link</span>
+                            </apex:outputpanel>                     
+                        </td>
+                    </tr>               
+                </table>
+                
+                </div>
+                   
+            </td>
+
+        </tr>
+    </table>
+    
+    </div>
+</div>
+
+</apex:outputPanel>
+
+
+<apex:outputPanel rendered="{!IsFullPage}">
+
+    <style type="text/css">
+    .bPageBlock .pbBody {
+        margin-right: 2px;
+        padding: 0px;
+    }
+    </style>
+
+    <apex:pageBlock title="{!TypeLabel}" mode="detail" >
+    
+        <apex:facet name="header">
+        <apex:insert name="linkback" />
+        </apex:facet>
+                     
+        <apex:iframe src="{!FullUrl}"  scrolling="True" />
+    </apex:pageBlock>
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!BvDSalesIntelligenceNoAccess}">
+<br />
+Your Salesforce account has not been configured for access to the BvD Sales intelligence app. 
+Contact your Salesforce administrator for access. 
+</apex:outputPanel>
+
+
+</apex:form>
+
+</apex:page>

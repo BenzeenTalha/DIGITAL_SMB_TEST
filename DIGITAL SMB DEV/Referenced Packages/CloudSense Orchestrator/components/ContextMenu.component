@@ -1,0 +1,122 @@
+<apex:component id="contextMenuComponent">
+	<apex:attribute id="attributeName" name="name" type="String" required="true" description="Name that will be used to differentiate between multiple instances of this component. Javascript object will be available under this name. "/>
+	<apex:attribute id="attributeId" name="elementId" type="String" required="true" description="Value of id attribut on HTML element where we want to make context menu available." ></apex:attribute>
+	<apex:attribute id="attributeOpenCallback" name="onOpenCallback" type="String" required="false" description="" ></apex:attribute>
+
+	<script type="text/javascript" charset="utf-8">
+	/*
+		jQ Menu plugin
+	*/
+	(function(j$) {
+	    j$.fn.setUpContextMenu = function() {
+	        j$(this).dialog({
+	            autoOpen: false,
+	            modal: true,
+	            resizable: false,
+	            width: 'auto',
+	            height: 'auto',
+	            minHeight: 'auto',
+	            minWidth: 'auto',
+	            show: "blind",
+	            hide: "fade",
+	            beforeClose: function(event, ui){
+	            	j$('.ui-widget-overlay').css('opacity', .80);
+	            }
+	        });
+
+	        return j$(this);
+	    };
+
+	    j$.fn.openContextMenu = function(jsEvent) {
+	        var menu = j$(this);
+
+	        menu.css('padding', 0);
+	        menu.children().button("enable");
+	        menu.dialog('option', 'position', [jsEvent.clientX, jsEvent.clientY]);
+	        menu.dialog('option', 'hide', 'fade');
+
+
+	        function openHandler(event, ui) {
+	            menu.parent().find('.ui-dialog-titlebar').hide();
+	            j$('.ui-widget-overlay').unbind('click');
+	            j$('.ui-widget-overlay').css('opacity', 0);
+	            j$('.ui-widget-overlay').bind('mousedown', function(e) {
+	            	if(e.which == 3){
+	            		menu.dialog('option', 'hide', null);
+	            	}
+	                menu.dialog('close');
+	            });
+	        }
+
+	        menu.unbind('dialogopen', openHandler );
+	        menu.bind('dialogopen', openHandler );
+	        menu.dialog('open');
+
+	        return menu;
+	    };
+	})(jQuery);
+	var j$ = jQuery.noConflict();
+	function {!name}ContextMenu(elementId){
+		var selfRef = this;
+		this.selector = '#contextMenu-{!name}';
+		j$(this.selector).children().css('display', 'block').button();
+		j$(this.selector).children().removeClass('ui-corner-all');
+		selfRef.menu = j$(this.selector).setUpContextMenu();
+
+		j$('#'+elementId).bind('mouseup', function(e) {
+			if(e.which == 3){
+				j$(selfRef.selector).openContextMenu(e);
+			}
+
+		});
+		j$(document).bind('contextmenu', function(e) {
+			return false;
+		});
+	}
+
+	{!name}ContextMenu.prototype = {
+		close: function(){
+			this.menu.dialog( 'close' );
+		},
+		disableOption: function( elementId ){
+			this.menu.find('#'+elementId).button("disable");
+		},
+		onclose: function(callback){
+			this.menu.bind( 'dialogclose', function(event, ui){
+					if(callback && typeof callback === 'function') callback(event);
+				}
+			);
+		},
+		onopen: function(callback){
+			this.menu.bind( 'dialogopen', function(event, ui){
+					if(callback && typeof callback === 'function') callback(event);
+				}
+			);
+		},
+		oncreate: function(callback){
+			this.menu.bind( 'dialogcreate', function(event, ui){
+					if(callback && typeof callback === 'function') callback(event);
+				}
+			);
+		},
+		cleanDOM: function(){
+			j$(this.selector).parent('[role="dialog"]').remove();
+			j$(this.selector).remove();
+		}
+
+	}
+
+	j$(document).ready(
+		function(){
+			{!name} = new {!name}ContextMenu( "{!elementId}" );
+			if( "{!onopenCallback}" != "") {!name}.onopen({!onOpenCallback});
+		}
+	);
+
+	</script>
+
+	<div id="contextMenu-{!name}">
+	  <apex:componentBody id="contextMenu-body" />
+	</div>
+
+</apex:component>

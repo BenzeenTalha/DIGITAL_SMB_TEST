@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>BvD Sales Intelligence</fullName>
+    <apiAccessLevel>Unrestricted</apiAccessLevel>
+    <description>MINT has information on companies, executives and news to help you find more opportunities more efficiently. MINT is rich with information that can help you find sales – using it, you can find companies by what they do and filter them by region and performance. 
+
+It’s ideal to help you with your sales planning, territory analysis, pitch preparation and lead prioritising. MINT has extensive ownership structures to help you navigate large companies for cross-selling opportunities. 
+
+You can easily find and integrate new leads or update and enrich existing ones. And using MINT’s easy to use front end you can create your own targeted lists.</description>
+    <namespacePrefix>bvdep</namespacePrefix>
+    <types>
+        <members>APIParameterController</members>
+        <members>BvDCRMCallback</members>
+        <members>BvDLinkController</members>
+        <members>ProductInstallerController</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>APIParameterInitialization</members>
+        <name>ApexComponent</name>
+    </types>
+    <types>
+        <members>BvDAccountLink</members>
+        <members>BvDContactLink</members>
+        <members>BvDLeadLink</members>
+        <members>BvDLinkTemplate</members>
+        <members>BvDSalesIntelligence</members>
+        <members>BvD_Databases</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
+        <members>BvD_Sales_Intelligence</members>
+        <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>BvD_Accessibility_Control__c.GotoBvD__c</members>
+        <members>BvD_Accessibility_Control__c.RemoveLink__c</members>
+        <members>BvD_Accessibility_Control__c.Update__c</members>
+        <members>BvD_Installed_Products__c.Category__c</members>
+        <members>BvD_Installed_Products__c.DefaultSelection__c</members>
+        <members>BvD_Installed_Products__c.Id__c</members>
+        <members>BvD_Installed_Products__c.ProductId__c</members>
+        <members>BvD_Installed_Products__c.Product_URL__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>BvD_Accessibility_Control__c</members>
+        <members>BvD_Installed_Products__c</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <members>BvDTab</members>
+        <members>BvD_EP_Databases</members>
+        <members>Orbis</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>BvDIcons</members>
+        <name>Document</name>
+    </types>
+    <types>
+        <members>BvD_Accessibility_Control__c-BvD Accessibility Control Layout</members>
+        <members>BvD_Installed_Products__c-BvD Installed Product Layout</members>
+        <name>Layout</name>
+    </types>
+    <types>
+        <members>BvD_Installed_Products__c.All</members>
+        <name>ListView</name>
+    </types>
+    <version>29.0</version>
+</Package>

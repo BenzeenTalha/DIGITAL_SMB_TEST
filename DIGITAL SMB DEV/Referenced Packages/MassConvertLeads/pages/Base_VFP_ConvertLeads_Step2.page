@@ -1,0 +1,66 @@
+<apex:page controller="MassConvert.MassLeadConvert" id="pg" tabStyle="Lead" sidebar="false" title="Mass Convert Leads - Select Contacts">
+<script>
+    function backToList()
+        {
+            location.href = '/00Q';
+            return false;
+        }
+</script>
+
+
+<!-- Section Header -->
+<apex:sectionHeader title="" subtitle="Mass Convert Leads" help="http://www.VersatileCapitalist.com"/>
+
+    <apex:form id="frm">
+        <apex:outputLabel value="{!infoMsg}" escape="false" /><BR/>
+        <apex:pageBlock id="pb" >
+            
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Convert" action="{!massConvertRecords}" rendered="{!IF(getLstResult.Size > 0,false,true)}"/>
+                <apex:commandButton value="Previous" action="{!step1}" rendered="{!IF(getLstResult.Size > 0,false,true)}"/>
+                <apex:commandButton value="Back To Leads List" onClick="return backToList();"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection columns="1" title="Mass Convert Leads" id="pbs" collapsible="false" rendered="{!IF(getLstResult.Size > 0,false,true)}">
+            
+                <apex:pageBlockTable value="{!listConvertParameters}" id="pbt" var="item" rendered="{!IF(getLstResult.SIze > 0,false,true)}">
+                    
+                    <apex:column headerValue="Account Name">
+                        <apex:outputLabel value="{!item.accountName}" /> 
+                    </apex:column>
+                    
+                    <apex:column headerValue="Contact Name">
+                        <apex:outputLabel value="{!item.contactName}" rendered="{!IF(item.listContact.Size > 1,false,true)}"/>
+                        <apex:outputPanel >
+                            <div class="requiredInput">
+                                <div class="requiredBlock"/>
+                                <apex:selectList value="{!item.selectedContactId}" size="1" multiselect="false" rendered="{!IF(item.listContact.Size > 1,true,false)}">
+                                    <apex:selectOptions value="{!item.listContact}" />
+                                </apex:selectList>
+                            </div>
+                        </apex:outputPanel>
+                    </apex:column>
+                </apex:pageBlockTable>
+                
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection collapsible="false" columns="1" title="Results" rendered="{!IF(getLstResult.Size > 0,true,false)}">
+                <B><apex:outputLabel value="{!successRecordCounter} record(s) converted successfully" rendered="{!IF(successRecordCounter = 0,false,true)}"></apex:outputLabel></B>
+                <B><apex:outputLabel value="{!failureRecordCounter} record(s) could not be converted." rendered="{!IF(failureRecordCounter = 0,false,true)}"></apex:outputLabel></B>
+            </apex:pageBlockSection>
+                
+            <apex:pageBlockSection collapsible="false" columns="1" title="Details" rendered="{!IF(getLstResult.Size > 0,true,false)}">
+                <apex:pageBlockTable value="{!getLstResult}" var="item" rendered="{!IF(getLstResult.Size > 0,true,false)}">
+                    
+                    <apex:column headerValue="Lead(Name-Company)">
+                        <apex:outputLabel value="{!item.leadInfo}"/>
+                    </apex:column>
+                    
+                    <apex:column headerValue="Results">
+                        <apex:outputLabel value="{!item.resultMessage}"/>
+                    </apex:column>
+                    
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

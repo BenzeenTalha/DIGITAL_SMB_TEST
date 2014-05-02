@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <webLinks>
+        <fullName>Mass_Convert</fullName>
+        <availability>online</availability>
+        <displayType>massActionButton</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>Mass Convert</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <requireRowSelection>true</requireRowSelection>
+        <url>{!REQUIRESCRIPT(&quot;/soap/ajax/20.0/connection.js&quot;)} 
+{!REQUIRESCRIPT(&quot;/soap/ajax/20.0/apex.js&quot;)} 
+
+var records = {!GETRECORDIDS($ObjectType.Lead)}; 
+var strIDs=&apos;&apos;; 
+
+if (records[0] == null) 
+{ 
+alert(&apos;Please select a record&apos;); 
+} 
+else 
+{ 
+for (var n=0; n&lt;records.length; n++) 
+{ 
+if(strIDs == &apos;&apos;) 
+strIDs = records[n]; 
+else 
+strIDs = strIDs + &quot;,&quot; + records[n] ; 
+}
+window.location.href = &apos;/apex/MassConvert__Base_VFP_ConvertLeads?selectedRecords=&apos;+strIDs + &apos;&amp;retURL=&apos; + location.href;
+ }</url>
+    </webLinks>
+    <webLinks>
+        <fullName>Mass_Convert_One_Click</fullName>
+        <availability>online</availability>
+        <displayType>massActionButton</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>Mass Convert - One Click</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <requireRowSelection>true</requireRowSelection>
+        <url>{!REQUIRESCRIPT(&quot;/soap/ajax/20.0/connection.js&quot;)} 
+{!REQUIRESCRIPT(&quot;/soap/ajax/20.0/apex.js&quot;)} 
+
+var records = {!GETRECORDIDS($ObjectType.Lead)}; 
+var strIDs=&apos;&apos;;
+if (records[0] == null) 
+{ 
+alert(&apos;Please select a record&apos;); 
+} 
+else 
+{ 
+for (var n=0; n&lt;records.length; n++)
+{ 
+if(strIDs == &apos;&apos;) 
+strIDs = records[n];
+else
+strIDs = strIDs + &quot;,&quot; + records[n] ;
+}
+alert(&apos;You can only convert leads that are owned by users.&apos;);
+var  res = sforce.apex.execute(&quot;MassConvert.MassLeadConvert&quot;,&quot;ConvertRecords&quot;,{records:strIDs,useExistingAccount:true,doNotCreateOpportunity:true,opportunityName:&apos;&apos;,convertedStatus:&apos;&apos;,sendEmailToOwner:false,taskSubject:&apos;&apos;}); 
+//alert(res);
+alert(&apos;Leads Converted Successfully.&apos;);
+window.location.href = window.location.href;
+}</url>
+    </webLinks>
+</CustomObject>

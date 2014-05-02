@@ -1,0 +1,9 @@
+<apex:component >
+	<apex:attribute name="rowClasses" type="String"
+		description="CSS classes for the row" />
+	<apex:attribute name="attr" type="cscfgc.Attribute"
+		description="The empty attribute" />
+
+	<td class="dataCol empty {!rowClasses}"></td>
+
+</apex:component>

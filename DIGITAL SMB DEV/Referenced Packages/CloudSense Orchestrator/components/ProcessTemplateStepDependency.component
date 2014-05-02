@@ -1,0 +1,62 @@
+<apex:component controller="CSPOFA.ProcessTemplateDependencyController" allowDML="true">
+    <apex:attribute name="page" type="CSPOFA.PageControllerBase" required="true" assignTo="{!page}" description="Reference to page controller object." ></apex:attribute>
+    <apex:attribute name="handle" type="String" required="true" assignTo="{!handle}" description="Handle that is used for component registration on page controller." ></apex:attribute>
+
+    <apex:attribute name="dependencyId" type="Id" required="false" assignTo="{!dependencyId}" description="Record id."/>
+    <apex:attribute name="dependentStepId" type="Id" required="false" assignTo="{!dependentStepId}" description="Id of dependent step for which we are creating dependency."/>
+    <apex:attribute name="dependencyStepId" type="Id" required="false" assignTo="{!dependencyStepId}" description="Id of dependency step for which we are creating dependency."/>
+    <apex:attribute name="allowEdit" type="Boolean" default="false" required="false" description="Allow edit for Dependent and Dependency fields." />
+
+    <apex:attribute name="showButtons" type="Boolean" default="false" required="false" description="Shoud component show Save/Cancel buttons"/>
+    <apex:attribute name="cancelURL" type="String" required="false" assignTo="{!cancelURL}" description="Relative URL where the component will redirect after save operation."/>
+    <apex:attribute name="saveURL" type="String" required="false" assignTo="{!saveURL}" description="Relative URL where the component will redirect after cancel operation."/>
+
+    <apex:attribute name="saveCallback" type="String" required="false" description="JS function that will be called when save is complete." />
+    <script type="text/javascript" charset="utf-8">
+        function getErrorVal(){
+            var id = "#{!$Component.cForm.errorFlag}".replace(/:/g,'\\:');
+            var errorVal = j$(id).attr('value');
+            return errorVal;
+        }
+        function getComponentMessages(){
+    		var id = "#{!$Component.cForm.pageblock.pageMessages}".replace(/:/g,'\\:');
+    		return j$(id).html();
+    	}
+    	function removeComponentMessages(){
+    		var id = "#{!$Component.cForm.pageblock.pageMessages}".replace(/:/g,'\\:');
+	    	j$(id).html('');
+    	}
+    	function getRecordId(){
+    		var id = "#{!$Component.cForm.sfid}".replace(/:/g,'\\:');
+    		return j$(id).html();
+    	}
+    </script>
+    <apex:form id="cForm" >
+        <apex:actionFunction name="updateDependency" reRender="pageblock" />
+        <apex:actionFunction name="saveDependency" action="{!save}" reRender="errorFlag,pageblock,sfid" oncomplete="({!saveCallback})();"/>
+
+        <apex:pageBlock id="pageblock" title="Dependency Template">
+            <apex:pageBlockButtons rendered="{!showButtons}">
+                <apex:commandButton value="Save" action="{!save}" reRender="pageblocksection"/>
+                <apex:commandButton value="Cancel" action="{!cancel}" reRender="pageblocksection"/>
+            </apex:pageBlockButtons>
+            <apex:pageMessages id="pageMessages" />
+            <apex:pageBlockSection id="pageblocksection" columns="2" showHeader="False">
+            	<apex:inputField value="{!stepDependency.Name}"/>
+            	<apex:outputField value="{!stepDependency.CSPOFA__Orchestration_Process_Template__c}" rendered="{!NOT(allowEdit)}"/>
+            	<apex:inputField value="{!stepDependency.CSPOFA__Orchestration_Process_Template__c}" required="true" rendered="{!allowEdit}"/>
+
+                <apex:outputField value="{!stepDependency.CSPOFA__Dependent__c}" rendered="{!NOT(allowEdit)}"/>
+                <apex:inputField value="{!stepDependency.CSPOFA__Dependent__c}" required="true" rendered="{!allowEdit}" />
+                <apex:outputField value="{!stepDependency.CSPOFA__Dependency__c}" rendered="{!NOT(allowEdit)}"/>
+                <apex:inputField value="{!stepDependency.CSPOFA__Dependency__c}" required="true" rendered="{!allowEdit}" onchange="updateDependency();"/>
+
+                <apex:inputField value="{!stepDependency.CSPOFA__Required_progress__c}" rendered="{!IF(DependencyType == 'Condition',false,true)}" />
+                <apex:inputField value="{!stepDependency.CSPOFA__Dependent_Condition__c}" rendered="{!IF(DependencyType == 'Condition',true,false)}" />
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:inputHidden id="errorFlag" value="{!errorFlag}" />
+        <apex:inputHidden value="{!stepDependency.Name}"  />
+        <apex:outputLabel id="sfid" style="visibility:hidden;"> {!stepDependency.Id} </apex:outputLabel>
+    </apex:form>
+</apex:component>

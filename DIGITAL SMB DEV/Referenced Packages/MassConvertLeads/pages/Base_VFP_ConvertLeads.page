@@ -1,0 +1,193 @@
+<apex:page controller="MassConvert.MassLeadConvert" id="pg" tabStyle="Lead" sidebar="false" title="Mass Convert Leads - Select Accounts"> 
+
+<!-- Section Header -->
+<apex:sectionHeader title="" subtitle="Mass Convert Leads" help="http://www.VersatileCapitalist.com"/>
+
+<script>
+
+    //This javascript method is to select/unselect all the check boxes if header level check box is selected.
+    function checkAllOppo(val)
+        {
+            idString = 'pg:frm:pb:pbs:pbt:';
+            var indSize = 50;
+            for(i=0;i < indSize;i++)
+                {
+                    if(document.getElementById(idString + i + ':oppoStatus') != null)
+                        document.getElementById(idString + i + ':oppoStatus').checked = val.checked;
+                     if(document.getElementById(idString + i + ':oppoName') != null)
+                        {
+                            document.getElementById(idString + i + ':oppoName').disabled = val.checked;
+                        }
+               }
+        }
+        
+    //This javascript method is to select/unselect all the check boxes if header level check box is selected.
+    function checkAllEmail(val)
+        {
+            idString = 'pg:frm:pb:pbs:pbt:';
+            var indSize = 50;
+            for(i=0;i < indSize;i++)
+                {
+                    if(document.getElementById(idString + i + ':Email') != null)
+                        document.getElementById(idString + i + ':Email').checked = val.checked;
+                }
+        }
+
+    var lName ="/_ui/common/data/LookupPage?lkfm=editPage&lknm=";
+    var lookUpWindow;
+    var leadId;
+    
+    function showLookup(ctrlID,objKeyPrefix,selectedLead)
+        {
+            leadId = selectedLead;
+            lookUpWindow = openLookup(lName + ctrlID +"&lktp="+objKeyPrefix,670);
+        }
+        
+    function lookupPick(pageType,lkIdType,idType,data1,idValue,labelValue,data2,data3)
+        {
+            if(idValue.match('^001') == null)
+                {
+                    if(document.getElementById(lkIdType) != null)
+                        document.getElementById(lkIdType).value = idValue;
+                    if(document.getElementById(idType) != null)
+                        document.getElementById(idType).value = labelValue;
+                }
+            else
+                {            
+                    addAccountSelectOption(leadId, idValue, labelValue);
+                }
+            top.window.focus();
+        }
+        
+    function disableOpportunityName(objCheckBox)
+        {
+            if(objCheckBox != null)
+                {
+                    var objId = objCheckBox.id;
+                    objId = objId.replace('oppoStatus', 'oppoName');
+                    if(document.getElementById(objId) != null)
+                        {
+                            document.getElementById(objId).disabled = objCheckBox.checked;
+                        }
+                }
+        }
+        
+    //This javascript method is to select/unselect all the check boxes if header level check box is selected.
+    function checkOppoName(oPPoNameObject)
+        {
+            var objId = oPPoNameObject.id;
+            objId = objId.replace('oppoName','hiddenOppoName');
+            if(document.getElementById(objId) != null)
+                {
+                    document.getElementById(objId).value = oPPoNameObject.value; 
+                }
+        }
+        
+</script>
+
+
+
+    <apex:form id="frm">
+        <apex:outputLabel value="{!infoMsg}" escape="false" /><BR/>
+        <apex:pageBlock id="pb" >
+            
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Convert" action="{!chooseContact}"/>
+                <apex:commandButton value="Cancel" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+            
+            <!-- Action function to add the account in select option list -->
+            <apex:actionFunction name="addAccountSelectOption" action="{!addAccount}" reRender="pbs" >
+                <apex:param name="param1" value="" assignTo="{!selectedLeadId}"/>
+                <apex:param name="param2" value="" assignTo="{!lookUpId}"/>
+                <apex:param name="param3" value="" assignTo="{!lookUpLabel}"/>
+            </apex:actionFunction>
+            
+            <apex:pageBlockSection columns="1" title="Mass Convert Leads" id="pbs" collapsible="false" rendered="{!IF(getLstResult.Size > 0,false,true)}">
+                <apex:variable value="{!0}" var="count" />
+                <apex:pageBlockTable value="{!listConvertParameters}" id="pbt" var="item" rendered="{!IF(getLstResult.SIze > 0,false,true)}">
+                
+                    <apex:column headerValue="Lead" >
+                        <apex:outputLink value="/{!item.lead.Id}" >{!item.lead.Name}</apex:outputLink>
+                    </apex:column>
+                    
+                    <!-- Commented as per the discussion on Nov 10-->
+                    <!-- UnCommented as per the discussion on Dec 06-->
+                    <apex:column headerValue="Record Owner" >
+                        <apex:inputField value="{!item.lead.ownerId}" />
+                    </apex:column>
+                     
+                    <!-- 
+                    <apex:column headerValue="Account Name">
+                        <apex:outputLabel value="{!item.accountName}" rendered="{!IF(item.listAccount.Size > 1,false,true)}"/>
+                        <apex:outputPanel >
+                            <div class="requiredInput">
+                                <div class="requiredBlock"/>
+                                <apex:selectList value="{!item.selectedAccountId}" size="1" multiselect="false" rendered="{!IF(item.listAccount.Size > 1,true,false)}">
+                                    <apex:selectOptions value="{!item.listAccount}" />
+                                </apex:selectList>
+                            </div>
+                        </apex:outputPanel> 
+                    </apex:column>
+                     -->
+                     
+                    <!-- Account LookUp -->
+                    <apex:column headerValue="Account Name" style="width:250px;" >
+                        <apex:outputPanel id="opAccList">
+                            <div class="requiredInput">
+                                <div class="requiredBlock"/>
+                                <apex:selectList value="{!item.selectedAccountId}" size="1" multiselect="false" id="selectedFieldValue" style="width:200px;">
+                                    <apex:selectOptions value="{!item.listAccount}" />
+                                </apex:selectList>
+                                <apex:image url="/s.gif" alt="Lookup (New Window)" styleClass="lookupIcon" onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';" onclick="showLookup('pg:frm:pb:pbs:pbt:' + {!count} + ':selectedFieldValue','001','{!item.lead.Id}');" title="Lookup (New Window)"/>
+                            </div>
+                        </apex:outputPanel>
+                        <apex:variable value="{!count+1}" var="count" />
+                    </apex:column>
+                    
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >Don't Create<BR/>Opportunity<Br/><input type="checkbox" id="selectAllOpportunity" onclick="checkAllOppo(this);"/>&nbsp;</apex:outputPanel>
+                        </apex:facet>
+                        <apex:inputCheckbox value="{!item.opprtunityStatus}" id="oppoStatus" onchange="disableOpportunityName(this);"/>
+                    </apex:column>
+
+                    <apex:column headerValue="Opportunity Name" >
+                        <apex:inputText value="{!item.opportunityName}" id="oppoName" disabled="false" onBlur="checkOppoName(this);"/>
+                        <apex:inputHidden value="{!item.opportunityName}" id="hiddenOppoName" />
+                    </apex:column>
+
+                    <apex:column >
+                        <apex:facet name="header">
+                            <apex:outputPanel >Send Email to<BR/>the Owner<BR/><input type="checkbox" id="selectAllEmail" onclick="checkAllEmail(this);"/>&nbsp;</apex:outputPanel>
+                        </apex:facet>
+                        <apex:inputCheckbox value="{!item.sendEmailToTheOwner}" id="Email"/>
+                    </apex:column>
+                    
+                    <!-- Commented as per the discussion on Nov 10
+                    <apex:column headerValue="Converted Status" >
+                        <apex:outputPanel >
+                            <div class="requiredInput">
+                                <div class="requiredBlock"/>
+                                <apex:selectList value="{!item.selectedConvertedStatus}" size="1" multiselect="false">
+                                    <apex:selectOptions value="{!item.listConvertedStatus}" />
+                                </apex:selectList>
+                            </div>
+                        </apex:outputPanel>
+                    </apex:column>
+                    -->
+                    
+                    <apex:column headerValue="Task Subject" >
+                        <apex:inputField value="{!item.task.Subject}" style="width:80px;" />
+                    </apex:column>
+                    
+                    <apex:column headerValue="Task Due Date" >
+                        <apex:inputField value="{!item.task.ActivityDate}" style="width:80px;" />
+                    </apex:column>
+                    
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+            
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

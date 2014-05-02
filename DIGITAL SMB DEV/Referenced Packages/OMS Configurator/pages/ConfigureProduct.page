@@ -1,0 +1,12 @@
+<apex:page standardController="cscfgc__Product_Bundle__c" extensions="cscfgc.ProductConfiguratorController" action="{!doCommand}" tabStyle="Opportunity">
+    <c:EmbedScripts />
+   
+    <c:SelectProductCategory parentController="{!controller}" rendered="{!currentPageStr == 'SelectProductCategory'}"/>
+    
+    <c:SelectProduct parentController="{!controller}" rendered="{!currentPageStr == 'SelectProduct'}"/>
+    
+    <c:ConfigureProduct parentController="{!controller}" rendered="{!currentPageStr == 'ConfigureProduct'}" id="configure"/>
+    
+    <c:SelectRelatedOption parentController="{!controller}" rendered="{!currentPageStr == 'SelectRelatedOption'}"/>
+
+</apex:page>

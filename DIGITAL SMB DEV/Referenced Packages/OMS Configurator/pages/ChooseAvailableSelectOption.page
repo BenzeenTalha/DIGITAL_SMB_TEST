@@ -1,0 +1,12 @@
+<apex:page standardController="cscfgc__Available_Select_Option__c" recordSetVar="tmp" extensions="cscfgc.AvailableSelectOptionController">
+
+    <apex:sectionHeader title="Available Select Options" subtitle="Choose Select Options"/>
+
+    <div style="padding: 10px 50px">
+        <c:MultiSelectorControl client="{!multiSelectorClient}"
+                sourceListTitle="Available Options"
+                selectedListTitle="Selected Options"
+                showTopBottomButtons="false"
+                showUpDownButtons="false" />
+    </div>
+</apex:page>

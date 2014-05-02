@@ -1,0 +1,41 @@
+<apex:page controller="CS_GT.GroupTaskUpdateController" title="Group Task Update" tabStyle="Group_Tasks__tab">
+    <apex:form >
+        <apex:pageBlock title="Update task" mode="detail">
+            <apex:pageBlockSection title="Task Information">
+            	<apex:pageBlockSectionItem rendered="{!IF(task.CS_GT__Associated_Group__c != null,true,false)}">
+            		<apex:outputLabel for="assignedTo" value="Assigned To"/>
+            		<apex:panelGroup >
+	            		<table>
+	            			<tr>
+	            				<td valign="top"><apex:outputField value="{!task.OwnerId}"/></td>
+	            			</tr>
+	            			<tr>
+	            				<td>& Public Group: <b><apex:outputField value="{!task.CS_GT__Associated_Group__c}"/></b></td>
+	            			</tr>
+	            		</table>
+            		</apex:panelGroup>
+            	</apex:pageBlockSectionItem>
+                <apex:outputField value="{!task.OwnerId}" rendered="{!IF(task.CS_GT__Associated_Group__c == null,true,false)}"/>
+                <apex:outputField value="{!task.WhatId}"/>
+                <apex:outputField value="{!task.status}"/>
+                <apex:outputField value="{!task.whoId}"/>
+                <apex:outputField value="{!task.Subject}"/>
+                <apex:outputField value="{!task.ActivityDate}"/>
+                <apex:outputField value="{!task.Priority}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Task Description / Comments" showHeader="false">
+                <apex:pageBlockSection title="Task Description / Comments">
+                    <apex:outputField value="{!task.Description}"/>
+                </apex:pageBlockSection>
+                <apex:pageBlockSection title="Reminder Information" columns="1">
+                    <apex:outputField value="{!task.IsReminderSet}"/>
+                    <apex:outputField value="{!task.ReminderDateTime}"/>
+                </apex:pageBlockSection>
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Edit" action="{!updateTask}" />
+                <apex:commandButton value="Cancel" action="{!cancel}" />
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

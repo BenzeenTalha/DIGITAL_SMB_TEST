@@ -1,0 +1,36 @@
+<apex:component >
+	<apex:attribute name="rowClasses" type="String"
+		description="CSS classes for row" />
+	<apex:attribute name="attr" type="cscfgc.Attribute"
+		description="Attribute to render" />
+	<apex:attribute name="required" type="Boolean"
+		description="Is attribute required" />
+	<apex:attribute name="errors" type="cscfgc.FieldMessage[]"
+		description="Error messages" />
+
+	<td class="dataCol attrWrapper {!rowClasses}">
+		<div class="{!if(required, 'requiredInput', '')}">
+		<div class="requiredBlock" />
+			<span class="lookupInput">
+				<input class="cfgCtrl" id="{!attr.absoluteReference.asId}_Name" name="{!attr.absoluteReference.asId}_Name" maxlength="255" size="20"
+						tabindex="11" type="text" value="{!attr.displayValue}"></input>
+				<span id="{!attr.absoluteReference.asId}_ctrlButtons">
+					<a href="javascript: void openLookupWindow('{!attr.absoluteReference.asId}', '{!attr.definition.lookup_config__c}', '{!attr.DynamicLookupFilters}' ,800)">
+						<img src="/s.gif" alt="Lookup {!attr.name}" class="lookupIcon"
+									onblur="this.className = 'lookupIcon';"
+									onfocus="this.className = 'lookupIconOn';"
+									onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+									onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+									title="Lookup {!attr.name}" />
+					</a>
+				</span>
+			</span>
+		</div>
+		
+		<c:ErrorMessage errors="{!errors}" field="{!attr.absoluteReference.asId}" />
+		
+		<input type="hidden" class="cfgAttr" id="{!attr.absoluteReference.asId}" name="{!attr.absoluteReference.asId}" value="{!attr.value}" onchange="CS.rules.evaluateAllRules()" />
+		<apex:outputText value="{!attr.propertiesAsHtml}" escape="false" />
+	</td>
+
+</apex:component>

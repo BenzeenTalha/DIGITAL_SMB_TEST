@@ -1,0 +1,313 @@
+<apex:page id="page" standardController="CSPOFA__Orchestration_Step_Template__c" Title="Create Orchestration Template Step" extensions="CSPOFA.CreateOrchestrationStepTplController" tabStyle="CSPOFA__Orchestration_Process_Template__c">
+    <apex:form id="form">
+        <apex:actionFunction id="jsUpdateCriteria" name="updateCriteriaSObjectFields" rerender="CriteriaDetailsSection"/>
+        <apex:actionFunction id="jsUpdateCriteriaDisplayLevel" name="updateCriteriaSObjectForField" action="{!displayLevel}" rerender="CriteriaDetailsSection">
+        	<apex:param id="displayLevel" name="dispLevel" value=""/>
+        </apex:actionFunction>
+		<apex:actionFunction id="jsCheckEmailToOther" name="checkEmailToOther" action="{!checkEmailToOther}" reRender="emailDetailsSection"></apex:actionFunction>
+
+        <apex:pageBlock id="pageblock" title="Step Template" >
+			<apex:pageMessages id="pageMessages" />
+            <apex:pageBlockButtons id="blockButtons">
+                <apex:commandButton id="save" value="Save" action="{!save}"/>
+                <apex:commandButton id="cancel" value="Cancel" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+
+            <apex:pageBlockSection id="pageblocksection" columns="2" showHeader="False">
+            	<apex:inputField id="name" value="{!CSPOFA__Orchestration_Step_Template__c.Name}" style="white-space: pre"/>
+                <apex:inputField id="processTemplate" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Orchestration_Process_Template__c}">
+                	<apex:actionSupport id="jsChange" event="onchange" reRender="pageblock" />
+                </apex:inputField>
+                <apex:pageBlockSectionItem id="dependentfieldsectionitem" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.Id == null,true,false)}">
+                    <apex:outputLabel id="labelType" value="Step Type"/>
+                    <apex:inputField value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c}" id="dependentField" required="True" >
+                        <apex:actionSupport id="jsChange" event="onchange" reRender="pageblock" />
+                    </apex:inputField>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="dependentfieldsectionitem1" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.Id != null,true,false)}">
+                    <apex:outputLabel id="labelType" value="Step Type"/>
+                    <apex:outputField id="fieldType" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c}" />
+                </apex:pageBlockSectionItem>
+                <apex:inputField id="fieldLogic" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Logic__c}" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Condition',true,false)}"/>
+                <apex:inputField id="fieldOLA" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__OLA_Time__c}"/>
+                <apex:inputField id="fieldCancel" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Supports_Cancel__c}"/>
+                <apex:inputField id="fieldRetries" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Max_Retries__c}"/>
+                <apex:inputField id="fieldMilestone" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Milestone__c}"/>
+                <apex:inputField id="fieldMilestoneLabel" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Milestone_Label__c}"/>
+                <apex:inputField id="fieldMilestoneDescription" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Milestone_Description__c}" style="width: 100%"/>
+                <apex:inputField id="fieldStepOrder" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Step_Order__c}"/>
+                <apex:inputField id="fieldDependencyLogic" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Dependency_Logic__c}"/>
+            </apex:pageBlockSection>
+            <apex:outputPanel id="emailPanel" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Send Email',true,false)}">
+                <apex:pageBlockSection id="emailDetailsSection" Title="Email Details Section" columns="2" showHeader="True">
+                	<apex:pageBlockSectionItem id="sectionEmailTemplate" >
+                		<apex:outputLabel id="labelEmailTemplate" value="Email Template"></apex:outputLabel>
+                    	<apex:selectList id="fieldEmailTemplate" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Email_Template_Name__c}" size="1">
+	                    	<apex:selectOptions id="optionsEmailTemplate" value="{!emailTemplates}"></apex:selectOptions>
+    	                </apex:selectList>
+                	</apex:pageBlockSectionItem>
+    	            <apex:pageBlockSectionItem id="sectionEmailTo" >
+    	            	<apex:outputLabel id="labelEmailTo" value="Send Email To"></apex:outputLabel>
+	                    <apex:selectList id="fieldEmailTo" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Send_Email_To__c}" onchange="checkEmailToOther();" size="1">
+                    		<apex:selectOptions id="optionsEmailTo" value="{!emailToOptions}"></apex:selectOptions>
+                    	</apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionLinkedObject" >
+                        <apex:outputLabel id="labelLinkedObject" value="Choose Linked Object"/>
+                        <apex:SelectList id="fieldLinkedObject" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Send_Email_Linked_To__c}" size="1" >
+                          <apex:selectOptions id="optionsLinkedObject" value="{!CriteriaSObjects}"></apex:selectOptions>
+                        </apex:SelectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:inputField id="sendEmailToOther" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Send_email_to_other__c}" rendered="{!IF(isEmailToOther,false,false)}" style="width: 100%;"/>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+            <apex:outputPanel id="taskPanel" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Create Task',true,false)}">
+                <apex:pageBlockSection id="taskDetailsSection" Title="Task Details Section" columns="2" showHeader="True">
+                    <apex:inputField id="fieldTaskSubject" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Task_Subject__c}"/>
+                    <apex:inputField id="fieldTaskAccountName" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Task_Account_Name_in_Subject__c}"/>
+
+                    <apex:pageBlockSectionItem id="sectionTaskStatus" >
+						<apex:outputLabel id="labelTaskStatus" value="Task Status"></apex:outputLabel>
+                    	<apex:selectList id="fieldTaskStatus" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Task_Status__c}" required="true" size="1">
+                    		<apex:selectOptions id="optionsTaskStatus" value="{!taskStatuses}"></apex:selectOptions>
+                    		<apex:actionSupport id="jsChange" event="onchange" reRender="pageblock" />
+						</apex:selectList>
+					</apex:pageBlockSectionItem>
+
+                    <apex:pageBlockSectionItem id="sectionTaskAssignedTo" >
+                    	<apex:outputLabel id="labelTaskAssignedTo" value="Task Assigned To" />
+                    	<apex:selectList id="fieldTaskAssignedTo" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Task_Assigned_To_2__c}" size="1">
+                    		<apex:selectOptions id="optionsTaskAssignedTo" value="{!taskAssignedToOptions}" />
+                    	</apex:selectList>
+                    </apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem id="sectionTaskPriority" >
+						<apex:outputLabel id="labelTaskPriority" value="Task Priority"></apex:outputLabel>
+                    	<apex:selectList id="fieldTaskPriority" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Task_Priority__c}" size="1">
+                    		<apex:selectOptions id="optionsTaskPriority" value="{!taskPriorities}"></apex:selectOptions>
+                    	</apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionTaskLinkedTo" >
+                        <apex:outputLabel id="labelTaskLinkedTo" value="Task Linked To"/>
+                        <apex:SelectList id="fieldTaskLinkedTo" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Task_Linked_To__c}" size="1" >
+                          <apex:selectOptions id="optionsTaskLinkedTo" value="{!TaskLinkedToSObjects}"></apex:selectOptions>
+                        </apex:SelectList>
+                    </apex:pageBlockSectionItem>
+
+                    <apex:pageBlockSectionItem id="sectionDaysToWait" >
+                    	<apex:outputLabel id="labelDaysToWait" value="Number of Days To Wait" />
+                    	<apex:inputField id="fieldDaysToWait" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Number_of_days_after_create_date__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionDateField" helpText="Specify date field after which number of days to wait. If field is not specified, step execution time is used.">
+                    	<apex:outputLabel id="labelDateField" value="Date Field API Name" />
+                    	<apex:inputField id="fieldDateField" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Field_Name__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionTaskType" >
+                    	<apex:outputLabel id="labelTaskType" value="Task Type"></apex:outputLabel>
+	                    <apex:selectList id="fieldTaskType" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Task_Type__c}" size="1" >
+                    		<apex:selectOptions id="optionsTaskType" value="{!taskTypes}"></apex:selectOptions>
+                    	</apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <br></br>
+                    <apex:inputField id="taskDescription" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Task_Description__c}" style="width:100%;"/>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+            <apex:outputPanel id="WaitNumberOfDaysPanel" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Wait Number Of Days',true,false)}">
+                <apex:pageBlockSection id="WaitNumberOfDaysDetailsSection" Title="Wait Number Of Days Details Section" columns="2" showHeader="True">
+                	<apex:pageBlockSectionItem id="sectionDaysToWait" >
+                		<apex:outputLabel id="labelDaysToWait" value="Number of Days To Wait"></apex:outputLabel>
+                    	<apex:inputField id="fieldDaysToWait" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Number_of_days_after_create_date__c}"/>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+            <apex:outputPanel id="TerminateStepPanel" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Terminate',true,false)}">
+
+                <apex:pageBlockSection id="TerminateStepSection" Title="Terminate Step Section" columns="2" showHeader="True">
+					<apex:pageBlockSectionItem id="sectionTerminateStatus" >
+                		<apex:outputLabel id="labelTerminateStatus" value="Terminate Process Status"></apex:outputLabel>
+                    	<apex:selectList id="fieldTerminateStatus" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Terminate_process_status__c}" size="1" >
+                    		<apex:selectOptions id="optionsTerminateStatus" value="{!processStatuses}"></apex:selectOptions>
+                    	</apex:selectList>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+            <apex:outputPanel id="FieldEventsPanel" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Update Field' || CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Monitor Field',true,false)}">
+                <apex:pageBlockSection id="FieldEventsDetailsSection" Title="Field Events Details Section" columns="2" showHeader="True">
+                    <apex:inputField id="fieldFieldName" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Field_Name__c}"/>
+                    <apex:inputField id="fieldFieldValue" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Field_Value__c}"/>
+                    <apex:inputField id="fieldFieldType" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Field_Type__c}"/>
+                    <apex:inputField id="fieldFieldMonitorOperator" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Field_Monitor_Operator__c}" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Monitor Field',true,false)}"/>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+            <apex:outputPanel id="casePanel" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Create Case',true,false)}">
+                <apex:pageBlockSection id="caseDetailsSection" Title="Case Details Section" columns="2" showHeader="True">
+                    <apex:inputField id="fieldCaseSubject" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Case_Subject__c}" />
+                    <apex:pageBlockSectionItem id="sectionCaseType" >
+                    	<apex:outputLabel id="labelCaseType" value="Case Type"></apex:outputLabel>
+	                    <apex:selectList id="fieldCaseType" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Case_Type__c}" size="1">
+                    		<apex:selectOptions id="optionsCaseType" value="{!caseTypes}"></apex:selectOptions>
+                    	</apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionCaseAssignedTo" >
+                    	<apex:outputLabel id="labelCaseAssignedTo" value="Case Assigned To"></apex:outputLabel>
+	                    <apex:selectList id="fieldCaseAssignedTo" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Case_Assigned_To_2__c}" required="true" size="1">
+                        	<apex:selectOptions id="optionsCaseAssignedTo" value="{!caseAssignedToOptions}">
+                        	</apex:selectOptions>
+                    		<apex:actionSupport id="jsChange" event="onchange" reRender="pageblock" />
+						</apex:selectList>
+					</apex:pageBlockSectionItem>
+
+					<apex:pageBlockSectionItem id="sectionCaseReason" >
+						<apex:outputLabel id="labelCaseReason" value="Case Reason"></apex:outputLabel>
+	                    <apex:selectList id="fieldCaseReason" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Case_Reason__c}" size="1">
+                    		<apex:selectOptions id="optionsCaseReason" value="{!caseReasons}"></apex:selectOptions>
+                    	</apex:selectList>
+	                </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionCaseRecordType" >
+                    	<apex:outputLabel id="labelCaseRecordType" value="Case Record Type"></apex:outputLabel>
+	                    <apex:selectList id="fieldCaseRecordType" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Case_Record_Type__c}" size="1">
+                    		<apex:selectOptions id="optionsCaseRecordType" value="{!caseRecordTypes}"></apex:selectOptions>
+                    	</apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <br></br>
+				<apex:inputField id="caseDescription" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Case_Description__c}" style="width: 100%"/>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+
+            <apex:outputPanel id="loopPanel" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Loop',true,false)}">
+                <apex:pageBlockSection id="loopDetailsSection" Title="Loop Details Section" columns="2" showHeader="True">
+                    <apex:pageBlockSectionItem id="sectionLoopTo" >
+                		<apex:outputLabel id="labelLoopTo" value="Loop To"/>
+                    	<apex:inputField id="fieldLoopTo" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Loop_Step_Lookup__c}" style="white-space: pre"></apex:inputField>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionLoopCount" >
+                    	<apex:outputLabel id="labelLoopCount" value="Number of Loops"/>
+                    	<apex:inputField id="fieldLoopCount" value="{!CSPOFA__Orchestration_Step_Template__c.CSPOFA__Loop_Count__c}"/>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+
+            <apex:outputPanel id="conditionPanel" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Condition',true,false)}">
+                <apex:pageBlockSection id="CriteriaDetailsSection" Title="Create Criteria Section" columns="2" showHeader="True">
+                    <apex:pageBlockSectionItem id="sectionSObject" >
+                        <apex:outputLabel id="labelSObject" value="Choose SObject"/>
+                        <apex:SelectList id="fieldSObject" value="{!CriteriaCondition.SObjectName}" size="1" onchange="updateCriteriaSObjectFields();" >
+                          <apex:selectOptions id="optionsSObject" value="{!CriteriaSObjects}"></apex:selectOptions>
+                        </apex:SelectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionSObjectField" >
+                        <apex:outputLabel id="labelSObjectField" value="Choose Field " />
+                        <apex:selectList id="chooseSObjectField" value="{!CriteriaCondition.FieldName}" size="1" onchange="updateCriteriaSObjectForField('1');">
+                            <apex:selectOptions id="optionsSObjectField" value="{!CriteriaSObjectFields}"/>
+                        </apex:selectList>
+
+                    </apex:pageBlockSectionItem>
+
+                     <apex:pageBlockSectionItem id="sectionSObjectL1" rendered="{!IF(displayObjLevelArray.size > 0,true,false)}" >
+                        <apex:outputLabel id="labelSObjectL1" value="Related SObject"/><apex:outputLabel id="valueSObjectL1" value="{!displayObjLevelArray[0]}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionSObjectField1" rendered="{!IF(displayObjLevelArray.size > 0,true,false)}">
+                        <apex:outputLabel id="labelSObjectFieldL1" value="Choose Field" />
+                        <apex:selectList id="chooseSObjectFieldL1" value="{!CriteriaCondition.FieldNameL1}" size="1" onchange="updateCriteriaSObjectForField('2');">
+                            <apex:selectOptions id="optionsSObjectField1" value="{!CriteriaSObjectFieldsL1}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+
+                    <apex:pageBlockSectionItem id="sectionSObjectL2" rendered="{!IF(displayObjLevelArray.size > 1,true,false)}">
+                        <apex:outputLabel id="labelSObjectL2" value="Related SObject"/><apex:outputLabel id="valueSObjectL2" value="{!displayObjLevelArray[1]}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionSObjectFieldL2" rendered="{!IF(displayObjLevelArray.size > 1,true,false)}">
+                        <apex:outputLabel id="labelSObjectFieldL2" value="Choose Field" />
+                        <apex:selectList id="chooseSObjectFieldL2" value="{!CriteriaCondition.FieldNameL2}" size="1" onchange="updateCriteriaSObjectForField('3');">
+                            <apex:selectOptions id="optionsSObjectFieldL2" value="{!CriteriaSObjectFieldsL2}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+
+                    <apex:pageBlockSectionItem id="sectionSObjectL3" rendered="{!IF(displayObjLevelArray.size > 2,true,false)}">
+                        <apex:outputLabel id="labelSObjectL3" value="Related SObject"/><apex:outputLabel id="valueSObjectL3" value="{!displayObjLevelArray[2]}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionSObjectFieldL3" rendered="{!IF(displayObjLevelArray.size > 2,true,false)}">
+                        <apex:outputLabel id="labelSObjectFieldL3" value="Choose Field" />
+                        <apex:selectList id="chooseSObjectFieldL3" value="{!CriteriaCondition.FieldNameL3}" size="1" onchange="updateCriteriaSObjectForField('4');">
+                            <apex:selectOptions id="optionsSObjectFieldL3" value="{!CriteriaSObjectFieldsL3}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+
+                    <apex:pageBlockSectionItem id="sectionSObjectL4" rendered="{!IF(displayObjLevelArray.size > 3,true,false)}">
+                        <apex:outputLabel id="labelSObjectL4" value="Related SObject"/><apex:outputLabel id="valueSObjectL4" value="{!displayObjLevelArray[3]}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionSObjectFieldL4" rendered="{!IF(displayObjLevelArray.size > 3,true,false)}">
+                        <apex:outputLabel id="labelSObjectFieldL4" value="Choose Field" />
+                        <apex:selectList id="chooseSObjectFieldL4" value="{!CriteriaCondition.FieldNameL4}" size="1">
+                            <apex:selectOptions id="optionsSObjectFieldL4" value="{!CriteriaSObjectFieldsL4}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionOperator" >
+                        <apex:outputLabel id="labelOperator" value="Operator" />
+                        <apex:inputField id="fieldOperator" value="{!CriteriaCondition.ConCriteria.CSPOFA__Operator__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem id="sectionFieldValue" >
+                        <apex:outputLabel id="labelFieldValue" value="Field Value" />
+                        <apex:inputField id="fieldFieldValue" value="{!CriteriaCondition.ConCriteria.CSPOFA__Field_Value__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:commandLink id="linkAddCriteria" action="{!AddCriteria}" rerender="criteriaPanel" > Add Criteria
+                    </apex:commandLink>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+
+            <apex:outputPanel id="criteriaPanel" rendered="{!IF(CSPOFA__Orchestration_Step_Template__c.CSPOFA__Type__c == 'Condition',true,false)}">
+            <apex:pageMessages id="messages" />
+                <apex:pageBlockSection id="criteriaSection" Title="Criteria Details Section" showHeader="True" >
+                   <apex:dataTable id="criteriaList" value="{!CriteriaList}" var="criteria" rowClasses="odd,even" styleClass="tableClass" columns="7" cellspacing="25">
+                        <apex:column id="criteriaListColumnSNo" >
+                        <apex:facet name="header">SNo.</apex:facet>
+                        {!criteria.SNo}
+                        </apex:column>
+                        <apex:column id="criteriaListColumnRelation" >
+                        <apex:facet name="header">Object Name</apex:facet>
+                        {!criteria.RelationName}
+                        </apex:column>
+                        <apex:column id="criteriaListColumnFieldName" >
+                        <apex:facet name="header">Field Name</apex:facet>
+                        <apex:outputText id="criteriaListOutputFieldName" value="{!criteria.FieldName}"/>
+                        </apex:column>
+                        <apex:column id="criteriaListColumnOperator" >
+                        <apex:facet name="header">Operator</apex:facet>
+                        <apex:outputText id="criteriaListOutputOperator" value="{!criteria.Operator}"/>
+                        </apex:column>
+                        <apex:column id="criteriaListColumnFieldValue" >
+                        <apex:facet name="header">Field Value</apex:facet>
+						<apex:outputText id="criteriaListOutputFieldValue" value="{!criteria.FieldValue}" style="display: inline-block; word-wrap: break-word; width: 30em;"/>
+                        </apex:column>
+                        <apex:column id="criteriaListColumnDelete" >
+                        <apex:commandLink id="criteriaListLinkDelete" action="{!DeleteCriteria}" rerender="criteriaPanel" > Delete
+                        <apex:param id="criteriaListLinkDeleteSNoParam" name="criteriaSNo" value="{!criteria.SNo}"/>
+                        </apex:commandLink>
+                    </apex:column>
+                        </apex:dataTable>
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+        </apex:pageBlock>
+
+    	<script type="text/javascript" charset="utf-8">
+			(function() {
+				var id ="{!$Component.form.pageblock.taskDetailsSection.taskDescription}";
+				if(id){
+					var element = document.getElementById(id)
+					if(element){
+						element.parentNode.setAttribute("colspan", 3);
+					}
+				}
+				id ="{!$Component.form.pageblock.caseDetailsSection.caseDescription}"
+				if(id){
+					var element = document.getElementById(id)
+					if(element){
+						element.parentNode.setAttribute("colspan", 3);
+					}
+				}
+			})();
+		</script>
+
+    </apex:form>
+
+
+</apex:page>

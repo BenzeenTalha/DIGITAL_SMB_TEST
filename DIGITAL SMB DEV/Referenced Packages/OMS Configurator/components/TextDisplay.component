@@ -1,0 +1,13 @@
+<apex:component >
+  <apex:attribute name="rowClasses" type="String" description="CSS classes for row"/>
+  <apex:attribute name="attr" type="cscfgc.Attribute" description="Attribute to render"/>
+  <apex:attribute name="required" type="Boolean" description="Is attribute required"/>
+  
+  <td class="{!rowClasses}" colspan="{!if(attr.definition.column_span__c > 0, 2.0*attr.definition.column_span__c, 2.0)}">
+    <span id="{!attr.absoluteReference.asId}" style="{!attr.definition.Column_Style__c}">
+        <apex:outputText styleClass="cfgAttr" escape="false" value="{!attr.value}" />
+    </span>
+  	<apex:outputText value="{!attr.propertiesAsHtml}" escape="false" />
+  </td>
+
+</apex:component>

@@ -1,0 +1,12 @@
+<apex:component access="global">
+	<apex:attribute name="price" type="Decimal" required="true" description="The price" access="global"/>
+	<apex:attribute name="free" type="String" default="" description="Text to display for a zero or blank price" access="global"/>
+	<apex:outputPanel rendered="{!ISBLANK(price) || price == 0}" layout="none">
+		{!free}
+	</apex:outputPanel>
+	<apex:outputPanel rendered="{!not(isblank(price)) && price > 0}" layout="none">
+		&pound; <apex:outputText value="{0,number, #,##0.00}">
+			<apex:param value="{!price}" />
+		</apex:outputText>
+	</apex:outputPanel>
+</apex:component>

@@ -1,0 +1,21 @@
+<apex:page controller="bvdep.BvDLinkController" sidebar="false" action="{!CheckProductSelection}" >
+
+<apex:form >
+
+<c:APIParameterInitialization ApiServiceUrl="{!$Api.Partner_Server_URL_260}" />
+  
+<apex:outputPanel rendered="{!AllowGotoBvD}">
+
+     <apex:iframe src="{!FullUrl}"  scrolling="True"  />
+</apex:outputPanel>
+
+
+<apex:outputPanel rendered="{!BvDSalesIntelligenceNoAccess}">
+<br />
+Your Salesforce account has not been configured for access to the BvD Sales intelligence app. 
+Contact your Salesforce administrator for access. 
+</apex:outputPanel>
+
+</apex:form>
+
+</apex:page>

@@ -1,0 +1,19 @@
+<apex:page standardController="Contact" extensions="bvdep.BvDLinkController" sidebar="false" action="{!CheckProductSelection}">
+
+<apex:outputText value="{! Contact.AccountId}" rendered="false" />
+
+<apex:composition template="bvdep__BvDLinkTemplate">
+    
+    <apex:define name="updateicon">
+        <apex:outputLink target="_top" value="{!UpdateLink}"><img src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!Product.Category__c}/contacts.gif" border="0" align="middle" id="updateImage" /></apex:outputLink>
+        <br/>
+        <span style="font-variant: small-caps; font-size:80%;">update contact data</span>                  
+    </apex:define>
+
+    <apex:define name="linkback">
+        <b>Contact</b> <a href="/{!Contact.Id}"> {!Contact.Name} </a>
+    </apex:define>
+    
+</apex:composition>
+
+</apex:page>

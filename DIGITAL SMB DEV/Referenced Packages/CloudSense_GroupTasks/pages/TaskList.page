@@ -1,0 +1,71 @@
+<apex:page Controller="CS_GT.GroupTaskListController" title="Group Task List" tabStyle="Group_Tasks__tab">
+    <apex:form >
+        <apex:pageBlock title="Search Filters" helpTitle="Help for this page!" helpUrl="/apex/HelpPage">
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!requeryTasks}" value="Search"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Search Filters" showHeader="false">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel for="GroupFilter">Group Filter </apex:outputLabel>
+                    <apex:panelGroup >
+                        <apex:selectList value="{!groupFilter}" size="1" multiselect="false">
+                            <apex:selectOptions value="{!groupOptions}"/>
+                        </apex:selectList>
+                    </apex:panelGroup>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel for="subjectFilter">Subject Filter</apex:outputLabel>
+                    <apex:panelGroup >
+                        <apex:inputText id="subjectFilter" value="{!subjectFilter}"/>
+                    </apex:panelGroup>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel for="statusFilter">Status Filter </apex:outputLabel>
+                    <apex:panelGroup >
+                        <apex:selectList value="{!statusFilter}" size="3" multiselect="true">
+                            <apex:selectOptions value="{!statusOptions}"/>
+                        </apex:selectList>
+                    </apex:panelGroup>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <!-- Empty Cell -->
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:pageBlock title="Group Task List" id="Tasks">
+            <div align="right" style="display:{!IF(NOT(ISNULL(tasks)),'block','none')}">
+                <font style="color:black; font-weight:bold;">&nbsp;&nbsp;&nbsp;Page #:&nbsp;</font><apex:outputLabel value="{!PageNumber}" style="color:black; font-weight:bold;"/>&nbsp;of&nbsp;<apex:outputLabel value="{!totalPageNumber}"style="color:black; font-weight:bold;"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                <apex:commandButton value="Previous" action="{!previousBtnClick}" disabled="{!previousButtonEnabled}" reRender="Tasks"></apex:commandButton>
+                <apex:commandButton value="Next" action="{!nextBtnClick}" disabled="{!nextButtonDisabled}" reRender="Tasks" ></apex:commandButton>
+            </div>
+           <apex:pageBlockSection title="Search Results" columns="1" showHeader="false">
+                <apex:pageBlockSectionItem >
+                    <apex:pageBlockTable value="{!tasks}" var="task">
+                        <apex:column headerValue="Action">
+                            <apex:outputLink value="/apex/TaskUpdate?id={!task.Id}" id="editLink">Edit</apex:outputLink>
+                        </apex:column>
+                        <apex:column headerValue="Subject">
+                            <apex:outputLink value="/apex/TaskDetail?id={!task.Id}" id="detailLink">{!task.subject}</apex:outputLink>
+                        </apex:column>
+                        <apex:column headerValue="Assigned To">
+		                        <apex:panelGroup >
+			            		<table>
+			            			<tr>
+			            				<td valign="top"><apex:outputField value="{!task.OwnerId}"/></td>
+			            			</tr>
+			            			<tr>
+			            				<td>& Public Group: <b><apex:outputField value="{!task.CS_GT__Associated_Group__c}"/></b></td>
+			            			</tr>
+			            		</table>
+		            		</apex:panelGroup>
+                        </apex:column>
+                        <apex:column headerValue="Related Lead or Contact" value="{!task.whoId}"/>
+                        <apex:column headerValue="Related To Record" value="{!task.whatId}"/>
+                        <apex:column headerValue="Due Date" value="{!task.ActivityDate}"/>
+                        <apex:column headerValue="Status" value="{!task.Status}"/> 
+                    </apex:pageBlockTable> 
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

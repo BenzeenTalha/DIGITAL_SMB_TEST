@@ -1,0 +1,44 @@
+<apex:page StandardController="cscfgc__Product_Bundle__c" Extensions="cscfgc.CloneBundleController" >
+
+    <!--
+    //#####################################################################
+    //# Apex page to Clone an existing Bundle
+    //#
+    //# CPS 04/10/2010
+    //#
+    -->
+
+    <apex:form >
+
+        <apex:pageBlock title="Copy Bundle">
+        <apex:pageBlock >
+        <h2>Copy bundle '{!sourceBundle.name}'  to another Opportunity </h2>
+
+           <br /><br />
+                <table width="90%" cellpadding="1" cellspacing="1">
+                    <tr>
+                        <td>Select opportunity to copy to:</td>
+                        <td><apex:inputField id="selOpportunity" value="{!targetBundle.cscfgc__Opportunity__c}"   required="true"/></td>
+                    </tr>
+                    <tr>
+                        <td>Enter name for new bundle:</td>
+                        <td><apex:inputText id="targetName"  value="{!targetName}" size="50"/></td> 
+                    </tr>
+
+                </table>
+
+                <apex:pageBlockButtons location="bottom">                   
+                    <apex:commandButton value="Copy Bundle" action="{!cloneBundle}"  />
+                    <apex:commandButton value="Cancel" action="{!cancel}" immediate="true"  />
+                </apex:pageBlockButtons>
+                <apex:Messages />
+                <apex:outputPanel layout="block" rendered="{!not(isblank(newBundleId))}">
+                	Bundle copied successfully.
+                	<apex:commandLink value="Click here to go to the new bundle" action="{!viewNewBundle}" />
+                </apex:outputPanel>
+
+            </apex:pageBlock>
+        </apex:pageBlock>
+    </apex:form>
+
+</apex:page>

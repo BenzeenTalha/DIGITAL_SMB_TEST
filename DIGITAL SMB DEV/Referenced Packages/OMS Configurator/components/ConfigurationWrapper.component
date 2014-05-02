@@ -1,0 +1,16 @@
+<apex:component >
+    <apex:attribute name="parentController" type="cscfgc.ProductConfiguratorController" required="true" description="The main controller" />
+    <!-- apex:attribute name="screenFlow" type="String" required="false" assignTo="{!parentController.screenFlowName}" description="The name of the screen flow to use" / -->
+
+    <apex:includeScript value="{!$Resource.cscfgc__jQuery_1_4_2_min}"/>
+    <script type="text/javascript">
+        jQuery.noConflict();
+    </script>
+
+    <c:SelectProductCategory parentController="{!parentController}" rendered="{!parentController.currentPageStr == 'SelectProductCategory'}"/>
+    
+    <c:SelectProduct parentController="{!parentController}" rendered="{!parentController.currentPageStr == 'SelectProduct'}"/>
+    
+    <c:ConfigureProduct parentController="{!parentController}" rendered="{!parentController.currentPageStr == 'ConfigureProduct'}"/>
+
+</apex:component>

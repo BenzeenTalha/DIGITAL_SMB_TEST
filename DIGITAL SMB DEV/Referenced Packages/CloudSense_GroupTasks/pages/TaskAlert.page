@@ -1,0 +1,32 @@
+<apex:page Controller="CS_GT.TaskAlertController" showHeader="false" sideBar="false" title="Group Task Alert" tabStyle="Group_Tasks__tab">
+    <apex:includeScript value="{!$Resource.CS_GT__CookiesUtility}"/>
+    <div style="visibility:hidden;height:0px;">{!Tasks}</div>
+    <script>
+        var grouptaskDismiss = readCookie('grouptaskDismiss');
+        if ({!displayResults}) {
+            document.write('<p> <font color="red"><a href="/apex/TaskList?overdueflag=true" target="_blank" style="text-decoration:none; color: red">{!NumberOfTasks} overdue group task(s)</a><\/font><\/p>');
+            if (!grouptaskDismiss) {
+                window.open('/apex/TaskAlertResults?displayresults=1','GroupTaskAlerts','location=no,status=no,menubar=no,toolbar=no,width=600,height=200');
+            }
+        } else {
+            document.write('<p><font color="green">No overdue group tasks.<\/font><\/p>');
+        }
+    </script>
+    <apex:pageBlock title="Group Task List" rendered="{!IF($CurrentPage.parameters.displayresults == '1',true,false)}">
+        <apex:form >
+            <apex:pageBlockSection title="Overdue Tasks" columns="1">
+                <apex:pageBlockSectionItem >
+                    <apex:pageBlockTable value="{!tasks}" var="task">
+                        <apex:column headerValue="Subject">
+                            <apex:outputLink value="/apex/TaskUpdate?id={!task.Id}" id="theLink">{!task.subject}</apex:outputLink>
+                        </apex:column>
+                        <apex:column headerValue="Associated Group" value="{!task.CS_GT__Associated_Group__c}"/>
+                        <apex:column headerValue="Related To" value="{!task.whatId}"/>
+                        <apex:column headerValue="Due Date" value="{!task.ActivityDate}"/> 
+                        <apex:column headerValue="Status" value="{!task.Status}"/> 
+                    </apex:pageBlockTable> 
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:form>
+    </apex:pageBlock>
+</apex:page>

@@ -1,0 +1,29 @@
+<apex:page standardController="Account" extensions="bvdep.BvDLinkController" sidebar="false" action="{!CheckProductSelection}"  >
+
+<apex:composition template="bvdep__BvDLinkTemplate">
+    
+    <apex:define name="updateicon">
+        <apex:outputLink target="_top" value="{!UpdateLink}"><img src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!Product.Category__c}/update.gif" border="0" id="updateImage" /></apex:outputLink>
+        <br/>
+        <span style="font-variant: small-caps; font-size:80%;">update account data</span>                      
+    </apex:define>
+
+    <apex:define name="additionalIcon1">
+        <apex:outputLink target="_top" value="{!OwnershipTreeLink}"><img src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!Product.Category__c}/ownership.gif" border="0" /></apex:outputLink>
+        <br/>
+        <span style="font-variant: small-caps; font-size:80%;">display the ownership tree</span>                                                  
+    </apex:define>
+
+    <apex:define name="additionalIcon2">
+        <apex:outputLink target="_top" value="{!UpdateContactsLink}"><img src="https://clientlogin.bvdep.com/CRMInteraction/Images/{!Product.Category__c}/contacts.gif" border="0"  /></apex:outputLink>
+        <br/>
+        <span style="font-variant: small-caps; font-size:80%;">update the contacts</span>                                                  
+    </apex:define>
+
+    <apex:define name="linkback">
+        <b>Account</b> <a href="/{!Account.Id}"> {!Account.Name} </a>
+    </apex:define>
+    
+    </apex:composition>
+
+</apex:page>

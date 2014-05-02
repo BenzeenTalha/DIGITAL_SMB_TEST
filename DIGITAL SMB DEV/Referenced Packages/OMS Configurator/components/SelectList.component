@@ -1,0 +1,48 @@
+<apex:component access="global">
+  <apex:attribute name="rowClasses" type="String" description="CSS classes for table cell in standard configuration screens" access="global"/>
+  <apex:attribute name="styleClass" type="String" description="CSS classes for visual control element" access="global"/>
+  <apex:attribute name="attr" type="cscfgc.Attribute" description="Attribute to render" access="global"/>
+  <apex:attribute name="required" type="Boolean" description="Is attribute required" access="global"/>
+  <apex:attribute name="errors" type="cscfgc.FieldMessage[]" description="Error messages" access="global"/>
+  <apex:attribute name="autoStyling" type="Boolean" description="Use SFDC internal styling" access="global"/>
+  <apex:attribute name="onchange" type="String" description="OnChange handler" access="global"/>
+  
+  <apex:outputPanel layout="none" rendered="{!not(autoStyling)}">
+  	<span class="attrWrapper">
+		<select class="cfgAttr {!styleClass}" id="{!attr.absoluteReference.asId}" name="{!attr.absoluteReference.asId}" onchange="CS.updateFromSelect(this.id); CS.rules.evaluateAllRules(); {!onchange}">
+		    <apex:repeat var="option" value="{!attr.availableOptions}">
+		        <apex:variable var="selected" value="{!attr.value == option.cscfgc__Value__c || (attr.value == null && attr.definition.cscfgc__Default_Value__c == option.cscfgc__Value__c)}" />
+		        <apex:outputPanel rendered="{!selected}">
+		            <option value="{!nullvalue(option.value__c, '')}" selected="selected">{!option.name}</option>
+		        </apex:outputPanel>
+		        <apex:outputPanel rendered="{!not(selected)}">
+		            <option value="{!option.cscfgc__Value__c}">{!option.name}</option>
+		        </apex:outputPanel>
+		    </apex:repeat>
+		</select>
+  	</span>
+	<apex:outputText value="{!attr.propertiesAsHtml}" escape="false" />
+  </apex:outputPanel>
+  
+  <apex:outputPanel layout="none" rendered="{!autoStyling}">
+	  <td class="dataCol attrWrapper {!rowClasses}">
+	    <div class="{!if(required, 'requiredInput', '')}">
+	        <div class="requiredBlock" />
+	        <select class="cfgAttr" id="{!attr.absoluteReference.asId}" name="{!attr.absoluteReference.asId}" onchange="CS.updateFromSelect(this.id); CS.rules.evaluateAllRules()">
+	            <apex:repeat var="option" value="{!attr.availableOptions}">
+	                <apex:variable var="selected" value="{!attr.value == option.cscfgc__Value__c || (attr.value == null && attr.definition.cscfgc__Default_Value__c == option.cscfgc__Value__c)}" />
+	                <apex:outputPanel rendered="{!selected}">
+	                    <option value="{!nullvalue(option.value__c, '')}" selected="selected">{!option.name}</option>
+	                </apex:outputPanel>
+	                <apex:outputPanel rendered="{!not(selected)}">
+	                    <option value="{!option.cscfgc__Value__c}">{!option.name}</option>
+	                </apex:outputPanel>
+	            </apex:repeat>
+	        </select>
+		</div>
+		<apex:outputText value="{!attr.propertiesAsHtml}" escape="false" />
+	    <c:ErrorMessage errors="{!errors}" field="{!attr.absoluteReference.asId}" />
+	  </td>
+	</apex:outputPanel>
+	
+</apex:component>

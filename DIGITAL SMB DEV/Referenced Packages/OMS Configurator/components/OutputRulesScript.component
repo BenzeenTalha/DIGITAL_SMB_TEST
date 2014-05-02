@@ -1,0 +1,48 @@
+<!-- This component is designed to be used with EmbedScript -->
+<apex:component controller="cscfgc.OutputRulesScriptController" access="global">
+	<!--  apex:attribute name="parentController" type="ProductConfiguratorController" assignTo="{!parentController}" description="The parent controller" required="true" /-->
+	<apex:attribute name="afterRules" type="String" description="Javascript function to execute after rules processing" required="false" />
+
+	<script type="text/javascript">
+		CS.namespace('rules');
+
+        {!selectOptionPrices}
+		
+		(function() {
+			this.evaluateAllRules = function evaluateAllRules() {
+				CS.executeOnLookupQueriesDone(executeRules);
+				
+				function executeRules() {
+					CS.resetAttributes();
+					CS.clearInfo();
+					
+					var passes = 0;
+					var passRequired = true;
+					
+					while (++passes < 3 && passRequired) {
+						CS.log('>>>>> Rule evaluation: pass ' + passes);
+						CS.updateCalculations();
+						{!ruleExecutions}
+						var inputs = jQuery('input');
+						passRequired = false;
+						jQuery('input').each(function(i, it) { if (jQuery(it).data('ruleLock') === true) passRequired = true; })
+					}
+					CS.updateMandatoryFields();
+					CS.applyAttributeEffects();
+					CS.updateMultiSelectLookupsDisplay();
+					<apex:outputText escape="false" rendered="{!not(isblank(afterRules))}">{!afterRules}</apex:outputText>
+					CS.unlockAttributes();
+					CS.log('*** Completed rule evaluation ***');
+				}
+			}
+	
+			{!ruleFunctions}
+		
+		}).call(CS.rules);
+		
+		<apex:outputText value="{!parentController.calculationsJavaScript}" escape="false" />
+		
+		$j(document).ready(CS.rules.evaluateAllRules);
+	</script>
+
+</apex:component>

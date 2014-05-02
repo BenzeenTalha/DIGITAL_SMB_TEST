@@ -1,0 +1,16 @@
+<apex:component access="global">
+	<apex:attribute name="attribute" type="cscfgc.Attribute" required="true" description="The attribute" access="global"/>
+    <apex:attribute name="styleClass" type="String" description="CSS classes for visual control element" access="global"/>
+	<apex:attribute name="option" type="cscfgc__Select_Option__c" required="true" description="The select option" access="global"/>
+	<apex:attribute name="selected" type="Boolean" required="true" description="Is this option selected" access="global"/>
+	<apex:attribute name="onchange" type="String" required="false" description="onchange handler" access="global"/>
+	
+	<apex:outputPanel layout="none" rendered="{!selected}">
+		<input type="radio" class="csOption {!attribute.absoluteReference.asId} {!styleClass}" name="{!attribute.absoluteReference.asId}-list" value="{!nullvalue(option.value__c, '')}"
+				checked="checked" onclick="CS.updateFromRadio('{!attribute.absoluteReference.asId}', this); CS.rules.evaluateAllRules(); {!onchange}" />
+	</apex:outputPanel>
+	<apex:outputPanel layout="none" rendered="{!not(selected)}">
+		<input type="radio" class="csOption {!attribute.absoluteReference.asId} {!styleClass}" name="{!attribute.absoluteReference.asId}-list" value="{!option.Value__c}"
+				onclick="CS.updateFromRadio('{!attribute.absoluteReference.asId}', this); CS.rules.evaluateAllRules(); {!onchange}" />
+	</apex:outputPanel>
+</apex:component>

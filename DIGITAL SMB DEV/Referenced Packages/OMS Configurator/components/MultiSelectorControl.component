@@ -1,0 +1,299 @@
+<apex:component controller="cscfgc.MultiSelector" allowDML="true">
+    <apex:attribute name="client" type="cscfgc.MultiSelectorClient" required="true"
+            description="The Client class which provides the source data and receives the sorted list" />
+            
+    <apex:attribute name="sourceListTitle" type="String" required="false" default="Available Items"
+            description="Title for the source list" />
+    
+    <apex:attribute name="selectedListTitle" type="String" required="false" default="Selected Items"
+            description="Title for the destination list" />
+    
+    <apex:attribute name="selectWidth" type="String" required="false" default="200px"
+            description="CSS width for the select boxes. Must be specified with units, e.g. '200px' (the default)" />
+            
+    <apex:attribute name="selectSize" type="Integer" required="false" default="11"
+            description="Number of rows to display in select boxes. Default is 11" />
+    
+    <apex:attribute name="showTopBottomButtons" type="Boolean" required="false" default="true"
+            description="If true (default), the 'move to top/bottom' buttons are displayed" />
+    
+    <apex:attribute name="showUpDownButtons" type="Boolean" required="false" default="true"
+            description="If true (default), the 'move up/down' buttons are displayed" />
+
+    <apex:attribute name="showSaveCancelButtons" type="Boolean" required="false" default="true"
+            description="If true (default), the 'save/cancel' buttons are displayed" />
+
+    <apex:form >
+        <p id="CS.MultiSelector.errors" style="color: #c00; display: none; margin-bottom: 12px"></p>
+        <table>
+            <tr>
+                <td>
+                    <p style="font-weight: bold; text-align: center">{!sourceListTitle}</p>
+                    <select id="CS.MultiSelector.sourceList" style="width: {!selectWidth}" size="{!selectSize}" multiple="multiple"></select>
+                </td>
+                <td style="vertical-align: middle; text-align: center">
+                    <div style="padding: 2px">Add</div>
+                    <div style="padding: 2px">
+                        <a href="javascript: CS.MultiSelector.add()"><img src="/s.gif" class="rightArrowIcon" alt="Add" title="Add" /></a>
+                    </div>
+                    <div style="padding: 2px">
+                        <a href="javascript: CS.MultiSelector.remove()"><img src="/s.gif" class="leftArrowIcon" alt="Remove" title="Remove" /></a>
+                    </div>
+                    <div class="text">Remove</div>
+                </td>
+                <td>
+                    <p style="font-weight: bold; text-align: center">{!selectedListTitle}</p>
+                    <select id="CS.MultiSelector.selectedList" name="CS.MultiSelector.selectedList" style="width: {!selectWidth}" size="{!selectSize}" multiple="multiple"></select>
+                </td>
+                <td style="padding-top: 3em; text-align: center; vertical-align: middle;">
+                    <apex:outputPanel layout="none" rendered="{!showTopBottomButtons}">
+                        <div style="padding: 2px">Top</div>
+                        <div style="padding: 2px 2px 6px 2px">
+                            <a href="javascript: CS.MultiSelector.moveTop()"><img src="/s.gif" class="doubleArrowUp" alt="Top" title="Top" /></a>
+                        </div>
+                    </apex:outputPanel>
+                    <apex:outputPanel layout="none" rendered="{!showUpDownButtons}">
+                        <div style="padding: 2px">Up</div>
+                        <div style="padding: 2px">
+                            <a href="javascript: CS.MultiSelector.moveUp()"><img src="/s.gif" class="upArrowIcon" alt="Up" title="Up" /></a>
+                        </div>
+                        <div style="padding: 2px">
+                            <a href="javascript: CS.MultiSelector.moveDown()"><img src="/s.gif" class="downArrowIcon" alt="Down" title="Down" /></a>
+                        </div>
+                        <div class="text">Down</div>
+                    </apex:outputPanel>
+                    <apex:outputPanel layout="none" rendered="{!showTopBottomButtons}">
+                        <div style="padding: 6px 2px 2px 2px">
+                            <a href="javascript: CS.MultiSelector.moveBottom()"><img src="/s.gif" class="doubleArrowDwn" alt="Bottom" title="Bottom" /></a>
+                        </div>
+                        <div class="text">Bottom</div>
+                    </apex:outputPanel>
+                </td>
+            </tr>
+            <apex:outputPanel layout="none" rendered="{!showSaveCancelButtons}">
+                <tr>
+                    <td colspan="4" style="text-align: center">
+                        <apex:commandButton value="Save" action="{!client.saveMultiSelection}" style="margin-right: 24px"/>
+                        <apex:commandButton value="Cancel" action="{!client.cancelMultiSelection}" />
+                    </td>
+                </tr>
+            </apex:outputPanel>
+        </table>
+        <input type="hidden" id="{!USER_SELECTION_PARAM}" name="{!USER_SELECTION_PARAM}" value="" />
+        <input type="hidden" id="{!USER_REJECTION_PARAM}" name="{!USER_REJECTION_PARAM}" value="" />
+        <apex:componentBody />
+    
+        <script type="text/javascript">
+            if (!window.CS) CS = {};
+    
+            CS.MultiSelector = function() {
+                // reference to this object as function scope causes confusion
+                this.thiz = this;
+                
+                function start(config) {
+                    thiz.config = config;
+                    thiz.sourceList = document.getElementById('CS.MultiSelector.sourceList');
+                    thiz.selectedList = document.getElementById('CS.MultiSelector.selectedList');
+                    thiz.requiredOptionsMap = {};
+                    
+                    populateList(thiz.sourceList, config.sourceList);
+                    populateList(thiz.selectedList, config.selectedList);
+                    updateUserSelection();
+
+                    for (var i = 0; i < config.selectedList.length; i++) {
+                        var option = config.selectedList[i];
+                        if (option.isRequired) thiz.requiredOptionsMap[option.id] = option;
+                    }
+                }
+                
+                function populateList(listElement, list) {
+                    listElement.length = 0;
+                    for (var i = 0; i < list.length; i++) {
+                        listElement[listElement.length] = new Option(list[i].name, list[i].id);
+                    }
+                }
+                
+                function updateUserSelection() {
+                    document.getElementById('{!USER_SELECTION_PARAM}').value = getListAsString(thiz.selectedList);
+                    document.getElementById('{!USER_REJECTION_PARAM}').value = getListAsString(thiz.sourceList);
+                }
+                
+                function getListAsString(list) {
+                    var selection = '';
+                    var comma = '';
+                    for (var i = 0; i < list.length; i++) {
+                        selection += comma + list[i].value;
+                        comma = ',';
+                    }
+                    return selection;
+                }
+                
+                function getSelectedOptions(list) {
+                    var selected = [];
+                    for (var i = 0; i < list.length; i++) {
+                        var option = list.options[i];
+                        if (option.selected) selected.push({index: i, name: option.text, value: option.value});
+                    }
+                    return selected;
+                }
+                
+                function addOptions(list, options) {
+                    list.selectedIndex = -1;
+                    for (var i = 0; i < options.length; i++) {
+                        list[list.length] = new Option(options[i].name, options[i].value);
+                        list[list.length-1].selected = true;
+                    }
+                }
+                
+                function removeOptions(list, options) {
+                    for (var i = options.length - 1; i > -1; i--) list.remove(options[i].index);
+                }
+                
+                function add() {
+                    clearErrors();
+                    move(sourceList, selectedList);
+                    updateUserSelection();
+                    thiz.selectedList.focus();
+                }
+                
+                function remove() {
+                    clearErrors();
+                    if (checkOptionsForRemoval()) {
+                        move(selectedList, sourceList);
+                        updateUserSelection();
+                    }
+                    thiz.sourceList.focus(); 
+                }
+                
+                function move(fromList, toList) {
+                    var options = getSelectedOptions(fromList);
+                    addOptions(toList, options);
+                    removeOptions(fromList, options);
+                }
+                
+                function moveUp() {
+                    clearErrors();
+                    
+                    for (var i = 0; i < selectedList.length; i++) {
+                    
+                        if (i == 0 && selectedList[i].selected) break;
+                    
+                        if (selectedList[i].selected)
+                                swap(selectedList[i], selectedList[i-1]);
+                    }
+                    
+                    selectedList.focus();
+                }
+                
+                function moveDown() {
+                    clearErrors();
+                    
+                    for (var i = selectedList.length-1; i > -1; i--) {
+                    
+                        if (i == selectedList.length-1 && selectedList[i].selected) break;
+                    
+                        if (selectedList[i].selected)
+                                swap(selectedList[i], selectedList[i+1]);
+                    }
+                                        
+                    selectedList.focus();
+                }
+                
+                function moveTop() {
+                    clearErrors();
+                    var topIndex = 0;
+                    
+                    for (var i = 0; i < selectedList.length; i++) {
+                    
+                        if (i <= topIndex) continue;
+                    
+                        if (selectedList[i].selected && !selectedList[topIndex].selected)
+                                swap(selectedList[i], selectedList[topIndex++]);
+                    }
+                    
+                    selectedList.focus();
+                }
+                
+                function moveBottom() {
+                    clearErrors();
+                    var bottomIndex = selectedList.length - 1;
+                    
+                    for (var i = selectedList.length-1; i > -1; i--) {
+                    
+                        if (i >= bottomIndex) continue;
+                    
+                        if (selectedList[i].selected && !selectedList[bottomIndex].selected)
+                                swap(selectedList[i], selectedList[bottomIndex--]);
+                    }
+                                        
+                    selectedList.focus();
+                }
+
+                function swap(first, second) {
+                    var temp = new Option(first.text, first.value);
+                
+                    first.text = second.text;
+                    first.value = second.value;
+                    first.selected = false;
+                
+                    second.text = temp.text;
+                    second.value = temp.value;
+                    second.selected = true;
+                }
+                
+                function checkOptionsForRemoval() {
+                    var errors = '';
+                    
+                    for (var i = 0; i < selectedList.length; i++) {
+                        var option = selectedList[i]; 
+                        if (option.selected && requiredOptionsMap[option.value]) {
+                            errors += requiredOptionsMap[option.value].requiredMessage + '<br />';
+                        }
+                    }
+                    
+                    if (errors != '') {
+                        document.getElementById('CS.MultiSelector.errors').innerHTML = errors;
+                        document.getElementById('CS.MultiSelector.errors').style.display = 'block';
+                        return false;
+                    }
+                    
+                    return true;
+                }
+                
+                function clearErrors() {
+                    document.getElementById('CS.MultiSelector.errors').innerHTML = '';
+                    document.getElementById('CS.MultiSelector.errors').style.display = 'none';
+                }
+                
+                // public methods
+                return {
+                    start: start,
+                    add: add,
+                    remove: remove,
+                    moveUp: moveUp,
+                    moveDown: moveDown,
+                    moveTop: moveTop,
+                    moveBottom: moveBottom
+                }   
+            }();
+    
+            CS.MultiSelector.start({
+                sourceList: [
+                <apex:variable var="sep" value="" />
+                <apex:repeat var="item" value="{!client.selectorSourceList}">
+                    {!sep}{id: "{!item.id}", name: "{!JSENCODE(item.name)}", isRequired: {!item.isRequired}, requiredMessage: "{!JSENCODE(item.requiredMessage)}"}
+                    <apex:variable var="sep" value="," />
+                </apex:repeat>
+                ],
+                selectedList: [
+                <apex:variable var="sep" value="" />
+                <apex:repeat var="item" value="{!client.selectorPreselectedList}">
+                    {!sep}{id: "{!item.id}", name: "{!JSENCODE(item.name)}", isRequired: {!item.isRequired}, requiredMessage: "{!JSENCODE(item.requiredMessage)}"}
+                    <apex:variable var="sep" value="," />
+                </apex:repeat>
+                ]
+                
+            });     
+        </script>
+    </apex:form>
+</apex:component>

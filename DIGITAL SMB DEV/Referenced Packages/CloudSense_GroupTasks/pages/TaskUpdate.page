@@ -1,0 +1,28 @@
+<apex:page controller="CS_GT.GroupTaskUpdateController" title="Group Task Update" tabStyle="Group_Tasks__tab">
+    <apex:form >
+        <apex:pageBlock title="Update task" mode="edit">
+            <apex:pageBlockSection title="Task Information">
+                <apex:inputField value="{!task.OwnerId}"/>
+                <apex:outputField value="{!task.WhatId}"/>
+                <apex:inputField value="{!task.status}"/>
+                <apex:outputField value="{!task.whoId}"/>
+                <apex:inputField value="{!task.Subject}"/>
+                <apex:inputField value="{!task.ActivityDate}"/>
+                <apex:inputField value="{!task.Priority}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Task Description / Comments" showHeader="false">
+                <apex:pageBlockSection title="Task Description / Comments">
+                    <apex:inputTextarea value="{!task.Description}" cols="80" rows="5"/>
+                </apex:pageBlockSection>
+                <apex:pageBlockSection title="Reminder Information" columns="1">
+                    <apex:inputField value="{!task.IsReminderSet}"/>
+                    <apex:inputField value="{!task.ReminderDateTime}"/>
+                </apex:pageBlockSection>
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!save}" value="save"/>
+                <apex:commandButton value="Cancel" action="{!cancel}" />
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

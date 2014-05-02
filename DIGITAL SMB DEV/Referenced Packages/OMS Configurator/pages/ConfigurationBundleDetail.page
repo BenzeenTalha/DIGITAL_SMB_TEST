@@ -1,0 +1,373 @@
+<apex:page standardController="cscfgc__Product_Bundle__c" extensions="cscfgc.ProductBundleController">
+
+	<apex:stylesheet value="{!$Resource.cscfgc__BundleDetail_css}"/>
+	<c:FixUIStyles /> 
+	<c:EmbedScripts />
+
+	<style type="text/css">
+		.numberCol {
+			text-align: right
+		}
+		.main {
+			padding-top: 8px;
+		}
+		.bold {
+			font-weight: bold;
+		}
+   </style>
+	<apex:form >
+		<apex:actionFunction name="delConfig" action="{!deleteConfiguration}" />
+		<apex:actionFunction name="legacyUpdateQuantity" action="{!updateQuantity}" />
+		<apex:actionFunction name="updateConfigurations" action="{!updateDirtyConfigurations}" />
+		<input type="hidden" name="delId" id="delId" value="" />
+		<input type="hidden" name="configId" id="configId" value="" />
+		<input type="hidden" name="quantity" id="quantity" value="" />
+		
+		<apex:detail relatedList="false" />
+		
+		<apex:pageBlock title="Configured Products">
+			<apex:pageBlockButtons location="top">
+				<c:ButtonWrapper rendered="{!configurationsNeedUpdate}">
+					<a href="#" onclick="updateConfigurations(); return false" style="{!buttonStyle}" class="{!buttonClass}">Update Configurations</a>
+				</c:ButtonWrapper>
+				<c:ButtonWrapper rendered="{!bundleIsUpdating}">
+					<a href="#" onclick="return false" style="opacity: 0.5; filter: alpha (opacity=50); {!buttonStyle}" class="{!buttonClass}">Updating Configurations</a>
+				</c:ButtonWrapper>
+				<apex:commandButton value="New Product Configuration" action="{!addNewConfiguration}" />
+			</apex:pageBlockButtons>
+
+
+			<apex:pageBlockTable var="item" value="{!sharedContextLineItems}" style="margin-bottom: 12px" rendered="{!hasSharedContext}">
+				<apex:column style="width: 100px" >
+					<apex:facet name="header">Action</apex:facet>
+					<apex:outputPanel layout="block" styleClass="main" rendered="{!item.isMain}">
+						<b>
+							<apex:outputPanel rendered="{!not(hasLinkedQuotes)}">
+								<a href="{!URLFOR($Page.cscfgc__ConfigureProduct, null, [configId=item.configurationId, retURL='/' & bundle.id])}" onclick="CS.progressOn()">Edit</a>
+							</apex:outputPanel>
+						</b>
+						<b>
+						  <apex:outputPanel layout="none" rendered="{!hasLinkedQuotes}">
+								<a href="javascript: alert('This bundle cannot be edited because it has been linked to one or more quotes. Please clone the bundle or delete the quotes to make changes.')"
+										style="text-decoration: none; color: #aaa">Edit</a>
+						  </apex:outputPanel>
+						</b>
+					</apex:outputPanel>
+				</apex:column>
+
+
+				<apex:column style="width: 100px">
+					<apex:facet name="header">Status</apex:facet>
+					<apex:outputPanel layout="block" styleClass="main" rendered="{!item.isMain}">
+						 {!item.ConfigStatus}
+					</apex:outputPanel>
+				</apex:column>
+
+				
+				<apex:column >
+					<apex:facet name="header">Shared Item</apex:facet>
+					<apex:outputPanel layout="block" styleClass="main bold" rendered="{!item.isMain}">
+						<b>{!item.description}</b>
+					</apex:outputPanel>
+					<apex:outputPanel layout="block" style="padding-left: 20px" rendered="{!not(item.isMain)}">
+						{!item.description}
+					</apex:outputPanel>
+				</apex:column>
+			</apex:pageBlockTable>
+		
+			<table class="list bundleDetail"  width="100%" cellpadding="0" cellspacing="0"  >
+				<tbody>
+				<tr class="headerRow" >
+					<th class="headingCellText" style="width: 100px">Action</th>
+					<th class="headingCellText" style="width: 100px">Status</th>										
+					<th class="headingCellText">Item</th>										
+					<th class="headingCellNumber">Quantity</th>
+					<th class="headingCellNumber">{!$Label.Non_recurring_header}</th>
+					<th class="headingCellNumber">{!$Label.Recurring_header}</th>
+				<apex:outputPanel layout="none" rendered="{!displayRecurringInvoiceColumn}">
+					<th class="headingCellNumber">{!$Label.Recurring_invoice_header}</th>
+				</apex:outputPanel>
+					<th class="headingCellNumber">{!IF(displayTCVColumn, $Label.Total_contract_value_header, $Label.Annualised_total_header)}</th>
+				</tr> 
+				<apex:repeat var="configWrapper" value="{!AllBundleItems}">
+				   
+				<!--  
+				#############################################
+				Top Row
+				#############################################
+				-->
+					<tr class="header">
+						<td class="controls">
+													
+							<apex:outputPanel rendered="{!not(hasLinkedQuotes)}">
+								<a href="{!URLFOR($Page.cscfgc__ConfigureProduct, null, [configId=configWrapper.config.Id, retURL='/' & bundle.id])}" onclick="CS.progressOn()">Edit</a>
+							</apex:outputPanel>
+							<apex:outputPanel layout="none" rendered="{!hasLinkedQuotes}">
+									<a href="javascript: alert('This bundle cannot be edited because it has been linked to one or more quotes. Please clone the bundle or delete the quotes to make changes.')"
+											style="text-decoration: none; color: #aaa">Edit</a>
+							  </apex:outputPanel> |
+							  
+							<a href="#" onclick="javascript:oWin = window.open('{!URLFOR($Page.cscfgc__CloneConfiguration, null, [configId=configWrapper.config.Id])}', 'copyConfig','addressbar=0,menubar=0,resizable=1,width=800,height=450');oWin.focus();">
+									Copy</a> |
+							
+							<apex:outputPanel layout="none" rendered="{!not(hasLinkedQuotes)}">
+								<a href="#" onclick="javascript:jQuery('#delId').val('{!configWrapper.config.Id}'); delConfig(); return false">Del</a>		
+							</apex:outputPanel>
+							
+							<apex:outputPanel layout="none" rendered="{!hasLinkedQuotes}">
+									<a href="javascript: alert('This bundle cannot be edited because it has been linked to one or more quotes. Please clone the bundle or delete the quotes to make changes.')"
+											style="text-decoration: none; color: #aaa">Del</a>
+							</apex:outputPanel>
+								
+						</td>
+
+						<td>
+							{!configWrapper.config.configuration_status__c}
+						</td>
+
+						<td class="totalCellText">
+							<a href="/{!configWrapper.config.Id}">{!configWrapper.config.Name}</a>
+						</td>
+
+						<td id="{!configWrapper.config.id}_qty"  class="totalCellNumber">
+							x <span class='displayValue'>
+								<apex:outputText value="{0, number, #,###,##0}"> 
+									<apex:param value="{!configWrapper.config.cscfgc__Quantity__c}" />
+								</apex:outputText>								
+							</span>&nbsp;							
+							<a href="javascript:showQtyBox('{!configWrapper.config.Id}','{!configWrapper.config.Name}','{!configWrapper.config.cscfgc__Quantity__c}','{!bundle.id}' );">Edit</a>
+						</td>
+						<td>
+						&nbsp;
+						</td>
+						<td class="totalCellNumber" >
+						</td>
+
+					<apex:outputPanel layout="none" rendered="{!displayRecurringInvoiceColumn}">
+						<td class="totalCellNumber">
+						</td>
+					</apex:outputPanel>
+					
+						<td class="totalCellNumber">
+							&nbsp;					  
+						</td> 
+
+					</tr>
+				<!--  
+				#############################################
+				LINE ITEM ATTRIBUTES
+				#############################################
+				-->
+					<apex:repeat var="attrib" value="{!configWrapper.attributeList}">
+						<tr>
+							<td colspan="2">&nbsp;</td>
+							
+							<td class="detailCellText" style="padding-left: 20px">
+								{!attrib.Line_Item_Description__c}
+							</td>
+							
+							<td class="detailCellText">&nbsp;</td>							
+
+							<td class="detailCellNumber">
+								<apex:outputPanel Rendered="{!NOT(attrib.cscfgc__Recurring__c)}">
+									<apex:outputText value="{0, number, #,###,##0.00}">
+										<apex:param value="{!attrib.cscfgc__Price__c * configWrapper.config.cscfgc__Quantity__c}" />
+									</apex:outputText>
+								</apex:outputPanel>
+							</td>
+						 
+							<td class="detailCellNumber">
+								<apex:outputPanel Rendered="{!attrib.cscfgc__Recurring__c}">
+									<apex:outputText value="{0, number, #,###,##0.00}">
+										<apex:param value="{!attrib.cscfgc__Price__c * configWrapper.config.cscfgc__Quantity__c}" />
+									</apex:outputText>
+								</apex:outputPanel>
+							</td>
+
+						<apex:outputPanel layout="none" rendered="{!displayRecurringInvoiceColumn}">
+							<td class="detailCellNumber">
+								<apex:outputPanel Rendered="{!attrib.cscfgc__Recurring__c}">
+									<apex:outputText value="{0, number, #,###,##0.00}">
+										<apex:param value="{!attrib.cscfgc__Billing_Price__c * configWrapper.config.cscfgc__Quantity__c}" />
+									</apex:outputText>
+								</apex:outputPanel>
+							</td>
+						</apex:outputPanel>
+						
+							<td class="detailCellText"> </td>
+						</tr>
+					</apex:repeat>
+							
+				<!--  
+				#############################################
+				TOTALS ROW 
+				#############################################
+				-->
+					<tr class="subtotals">
+						<td colspan="2" style="border:none">
+						&nbsp;
+						</td>
+						<td class="totalCellText"> Totals for {!configWrapper.config.Name}</td>
+						<td class="totalCellNumber">
+							<!-- 
+							<apex:outputText value="x {0, number, #,###,##0.##}"> 
+								<apex:param value="{!configWrapper.config.cscfgc__Quantity__c}" />
+							</apex:outputText>
+							
+							<a id="{!configWrapper.config.id}_qty" href="javascript:showQtyBox('{!configWrapper.config.Id}','{!configWrapper.config.Name}','{!configWrapper.config.cscfgc__Quantity__c}','{!bundle.id}' );">Change</a>
+							 -->
+							 &nbsp;
+						</td>
+						<td class="totalCellNumber">
+							<apex:outputText value="{0, number, #,###,##0.00}">
+								<apex:param value="{!configWrapper.oneOffCharge *  configWrapper.config.cscfgc__Quantity__c}" />
+							</apex:outputText>
+						</td>
+						<td class="totalCellNumber">
+							<apex:outputText value="{0, number, #,###,##0.00}">
+								<apex:param value="{!configWrapper.RecurringCharge * configWrapper.config.cscfgc__Quantity__c}" />
+							</apex:outputText><br />
+							<apex:outputText value="({!configWrapper.RecurringCostFrequency})" Rendered="{! configWrapper.RecurringCostFrequency != null}">
+							</apex:outputText>
+						</td>
+
+
+					<apex:outputPanel layout="none" rendered="{!displayRecurringInvoiceColumn}">
+						<td class="totalCellNumber">
+							<apex:outputText value="{0, number, #,###,##0.00}">
+								<apex:param value="{!configWrapper.RecurringBillingCharge * configWrapper.config.cscfgc__Quantity__c}" />
+							</apex:outputText>
+							<br />
+							<apex:outputText value="({! configWrapper.RecurringBillingFrequency})" Rendered="{! configWrapper.RecurringBillingFrequency!= null}">
+							</apex:outputText>
+						</td>
+					</apex:outputPanel>
+	
+						<td class="totalCellNumber">
+							<apex:outputText value="{0, number, #,###,##0.00}">
+								<apex:param value="{!IF(displayTCVColumn, configWrapper.totalContractValue, configWrapper.totalPrice)}" />
+							</apex:outputText>
+						</td>
+					</tr>
+
+					<tr><td class="spacerheight" colspan="{!IF(displayRecurringInvoiceColumn, 8, 7)}">&nbsp;</td></tr>
+				</apex:repeat>
+
+					<!--  
+					#############################################
+					GRAND TOTAL ROW 
+					#############################################
+					-->
+					<tr class="grandtotal">
+						<td colspan="2" style="border:none">
+						&nbsp;
+						</td>
+						<td class="totalCellText" colspan="{!IF(displayRecurringInvoiceColumn, 5, 4)}">Grand Total</td>
+
+						<td class="totalCellNumber">
+							<apex:outputText value="{0, number, #,###,##0.00}">
+								<apex:param value="{!grandTotal}" />
+							</apex:outputText>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</apex:pageBlock>
+
+	  
+	  	<div id="divQtyChangeContainer" class="hiddenQtyContainer">
+		  	<div id="divQtyChange" class="visibleQtyBox">
+			  	<apex:pageBlock >
+					<table border="0" cellpadding="2" cellspacing="2">						
+						<tr>
+							<td>Enter New Quantity: </td><td><input id="userQty" name="userQty" size="2" width="50"></input></td>
+						</tr>
+						<tr>
+							<td colspan="2" id="qtyDisplay" align="center"><a href="javascript:changeQty();">Save</a> | <a href="javascript:cancelChangeQty();">Cancel</a></td>
+						</tr>
+					</table>					
+			  	</apex:pageBlock>
+		  	</div>
+	  		<input type="hidden" id="hidNewQty" name="hidNewQty" value=""></input>
+			<input type="hidden" id="hidQtyConfigId" name="hidQtyConfigId" value=""></input>
+			<input type="hidden" id="hidBundleId" name="hidBundleId" value=""></input>
+		  	
+	  	</div>
+		<script type="text/javascript">
+		
+		
+		var $ = jQuery.noConflict();
+		$(document).ready(function() {
+			$('#userQty').keypress(function(e) {
+				if (e.which == 13) {
+					e.stopPropagation();
+					e.preventDefault();
+					changeQty();
+					return false;
+				}
+			});
+		});
+		
+		function addCommas(nStr) {
+			nStr += '';
+			x = nStr.split('.');
+			x1 = x[0];
+			x2 = x.length > 1 ? '.' + x[1] : '';
+			var rgx = /(\d+)(\d{3})/;
+			while (rgx.test(x1)) {
+				x1 = x1.replace(rgx, '$1' + ',' + '$2');
+			}
+			return x1 + x2;
+		}
+		
+			
+		//#
+		//# Change Qty Functions
+		//#		
+		function showQtyBox(configId, configName, oldQty, bundleId)
+		{
+				var result = parseInt(oldQty); 
+			  	var qtyOffset = $("#" + configId + "_qty").offset();
+			  	var qtyTop = qtyOffset.top;
+			  	var qtyLeft = qtyOffset.left;
+				$("#userQty").val(result);
+				$("#hidNewQty").val(result);
+				$("#qtyCaption").innerText = 'Change quantity for ' + configName;
+				$("#hidQtyConfigId").val(configId);
+				$("#hidBundleId").val(bundleId);
+		 		$("#divQtyChangeContainer").removeClass("hiddenQtyContainer");
+		 		$("#divQtyChangeContainer").addClass("visibleQtyContainer");
+				$("#divQtyChange").offset(qtyOffset);
+		}
+		
+		function changeQty()
+		{
+			var quantity = parseInt($("#userQty").val()),
+				configId = $('#hidQtyConfigId').val();
+ 
+			if (isNaN(quantity) || quantity < 1)
+			{
+				alert("Invalid quantity value entered");
+			}
+			else
+			{
+				$('#qtyDisplay').html('Updating...');
+		 		
+		 		$('#configId').val(configId);
+		 		$('#quantity').val(quantity);
+		 		legacyUpdateQuantity();
+		 		
+			}
+		}
+	  
+		function cancelChangeQty()
+		{
+			$("#divQtyChangeContainer").removeClass("visibleQtyContainer");
+			$("#divQtyChangeContainer").addClass("hiddenQtyContainer");
+		}
+		</script>
+
+ 
+
+	</apex:form>
+</apex:page>

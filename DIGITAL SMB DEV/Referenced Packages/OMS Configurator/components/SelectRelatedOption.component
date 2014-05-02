@@ -1,0 +1,88 @@
+<apex:component >
+    <apex:attribute name="parentController" type="cscfgc.ProductConfiguratorController" required="true" description="Page controller"/>
+
+    <apex:form >        
+        <div class="bPageTitle">
+            <div class="ptBody secondaryPalette">
+                <div class="content">
+                    <img src="/s.gif" alt="Opportunity" class="pageTitleIcon" title="Opportunity"></img>
+                    <h1 class="pageType">
+                        Product Configuration Edit<span class="titleSeparatingColon">:</span>
+                    </h1>
+                    <h2 class="pageDescription">
+                        New Related Product Configuration
+                    </h2>
+                    <div class="blank">
+                        &nbsp;
+                    </div>
+                </div>
+                <div class="links">
+                    <a href="#" title="Help for this Page (New Window)"><span class="helpLink">Help for this Page</span><img src="/s.gif" alt="Help" class="helpIcon" title="Help"></img></a>
+                </div>
+            </div>
+    
+            <apex:outputPanel styleClass="ptBreadcrumb">
+                <apex:commandLink action="{!parentController.selectCategory}" rendered="{!not(isblank(parentController.category.cscfgc__Parent_Category__c))}">
+                    <apex:param name="categoryId" assignTo="{!parentController.categoryId}" value="{!parentController.category.cscfgc__Parent_Category__c}" />
+                    &lt; Back to {!parentController.category.parent_category__r.name}
+                </apex:commandLink>
+            </apex:outputPanel>
+            
+        </div>
+        
+        <apex:outputPanel layout="block" rendered="{!parentController.numCategories == 0 && parentController.numDefinitions == 0}">
+        	<h3>No products available</h3>
+        	<p>Either no products options have been defined, none is active or you do not have permission to access them.</p>
+        </apex:outputPanel>
+    
+        <apex:pageBlock title="{!parentController.category.name} Categories" rendered="{!parentController.numCategories > 0}">
+            <apex:pageBlockTable var="category" value="{!parentController.categories}">
+                <apex:column >
+                    <apex:facet name="header">Category Name</apex:facet>
+                    <apex:commandLink action="{!parentController.selectRelatedProduct}" value="{!category.name}">
+                        <apex:param name="relatedCategoryId" assignTo="{!parentController.relatedCategoryId}" value="{!category.id}"/>
+                    </apex:commandLink>
+                </apex:column>
+
+                <apex:column >
+                    <apex:facet name="header">Description</apex:facet>
+                    {!category.cscfgc__Description__c}
+                </apex:column>
+                
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+
+        <apex:pageBlock title="{!parentController.category.name}" rendered="{!parentController.numDefinitions > 0}">
+            <apex:pageBlockTable var="definition" value="{!parentController.definitions}">
+                <apex:column >
+                    <apex:facet name="header">Product Name</apex:facet>
+                    <apex:commandLink action="{!parentController.addRelatedProduct}" value="{!definition.name}">
+                        <apex:param name="relatedDefinitionId" assignTo="{!parentController.relatedDefinitionId}" value="{!definition.id}"/>
+                        <!--  <apex:param assignTo="{!parentController.relatedCategoryId}" value="{!null}"/> -->
+                        <!-- <apex:param assignTo="{!parentController.relatedId}" value="{!null}"/>  -->
+                    </apex:commandLink>
+                </apex:column>
+
+                <apex:column >
+                    <apex:facet name="header">Description</apex:facet>
+                    {!definition.cscfgc__Description__c}
+                </apex:column>
+
+                <apex:column >
+                	<div style="padding: 4px">
+                		<apex:outputPanel layout="none" rendered="{!NOT(ISBLANK(definition.cscfgc__image_url__c))}">
+							<img src="{!definition.image_url__c}" />
+						</apex:outputPanel>
+                	</div>
+                </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+        
+        <br/>&nbsp;&nbsp;
+         <c:ButtonWrapper >
+         	<apex:commandLink action="{!parentController.cancelSelectRelatedProduct}" value="Cancel" styleClass="{!buttonClass}" style="{!buttonStyle}">
+            </apex:commandLink>
+         </c:ButtonWrapper>
+
+    </apex:form>
+</apex:component>

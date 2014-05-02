@@ -1,0 +1,31 @@
+<apex:component access="global">
+	<apex:attribute name="parentController" type="cscfgc.ProductConfiguratorController" required="true" description="The ProductConfiguratorController instance" access="global"/>
+
+	<!-- apex:outputPanel layout="none" rendered="{!NOT(parentController.currentScreen.Show_Configuration_and_Product_Name__c)}" -->
+	    <input type="hidden"
+	        id="{!parentController.config.reference.asId}:_name"
+	        name="{!parentController.config.reference.asId}:_name"
+	        value="{!parentController.config.sobject.name}"/>
+	<!-- /apex:outputPanel -->
+	
+	<input type="hidden" id="{!parentController.config.reference.asId}:_attrname"
+			name="{!parentController.config.reference.asId}:_attrname" value="{!parentController.config.attributeName}" />
+
+	<input type="hidden" id="{!parentController.config.reference.asId}:_index"
+			name="{!parentController.config.reference.asId}:_index" value="{!parentController.config.index}" />
+
+	<input type="hidden" id="{!parentController.config.reference.asId}:_product"
+			name="{!parentController.config.reference.asId}:_product" value="{!parentController.config.productDefinition.name}" />
+
+	<input type="hidden" id="{!parentController.config.reference.asId}:_recurrence"
+			name="{!parentController.config.reference.asId}:_recurrence" value="{!parentController.config.sObject.recurrence_frequency__c}" />
+
+	<input type="hidden" id="{!parentController.config.reference.asId}:_status"
+			name="{!parentController.config.reference.asId}:_status" value="{!parentController.config.sObject.configuration_status__c}" />
+
+	<input type="hidden" id="{!parentController.config.reference.asId}:_validationmessage"
+			name="{!parentController.config.reference.asId}:_validationmessage" value="{!parentController.config.sObject.Validation_Message__c}" />
+			
+	<apex:outputText value="{!parentController.hiddenAttributesAsHtml}" escape="false" />
+	
+</apex:component>

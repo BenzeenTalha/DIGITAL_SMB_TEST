@@ -1,0 +1,24 @@
+<apex:page Controller="CS_GT.TaskAlertController" showHeader="false" sideBar="false" title="Group Task Alert" tabStyle="Group_Tasks__tab">
+	<apex:includeScript value="{!$Resource.CS_GT__CookiesUtility}"/>
+    <apex:form >
+    	<apex:pageBlock title="Overdue Group Tasks" rendered="{!IF($CurrentPage.parameters.displayresults == '1',true,false)}">
+	        <apex:pageBlockButtons >
+	            <apex:commandButton onclick="createCookie('grouptaskDismiss','Remind',0.006);window.close();" value="Remind me later"/>
+	            <apex:commandButton onclick="createCookie('grouptaskDismiss','Dismiss',0);window.close();" value="Dismiss"/>
+	        </apex:pageBlockButtons>
+	        <apex:pageBlockSection title="Overdue Group Tasks" showHeader="false" columns="1">
+	        	<apex:pageBlockSectionItem >
+			        <apex:pageBlockTable value="{!tasks}" var="task">
+			            <apex:column headerValue="Subject">
+			                <apex:outputLink onclick="window.opener.parent.location = '/apex/TaskDetail?id={!task.Id}';createCookie('grouptaskDismiss','Dismiss',0);window.close();" id="theLink">{!task.subject}</apex:outputLink>
+			            </apex:column>
+			            <apex:column headerValue="Associated Group" value="{!task.CS_GT__Associated_Group__c}"/>
+			            <apex:column headerValue="Related To" value="{!task.whatId}"/>
+			            <apex:column headerValue="Due Date" value="{!task.ActivityDate}"/> 
+			            <apex:column headerValue="Status" value="{!task.Status}"/> 
+			        </apex:pageBlockTable> 
+	            </apex:pageBlockSectionItem>
+	    	</apex:pageBlockSection>
+    	</apex:pageBlock>
+	</apex:form>
+</apex:page>

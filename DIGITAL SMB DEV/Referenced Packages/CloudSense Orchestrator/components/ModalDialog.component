@@ -1,0 +1,163 @@
+<apex:component id="modalDialogComponent" >
+	<apex:attribute id="attributeName" name="name" type="String" required="true" description="Name that will be used to differentiate between multiple instances of this component. Javascript object will be available under this name. ">
+	</apex:attribute>
+	<style type="text/css">
+		#spinner {
+			background: url({!URLFOR($Resource.POFJQUERYUI,'css/cupertino/images/spinner.gif')}) 50% 50% no-repeat;
+			top:0;
+			left:60%;
+			height:100%;
+			width:40%;
+			display:block;
+			position:absolute;
+		}
+	</style>
+	<script type="text/javascript" charset="utf-8">
+
+	var j$ = jQuery.noConflict();
+
+	function {!name}Dialog(){
+		this.selector = '#modalDialog-{!name}';
+		j$(this.selector).parent('[role="dialog"]').remove();
+		this.textMessageSelector = '#modalDialog-{!name} > #textMessage';
+		this.formBodySelector = '#modalDialog-{!name} > #formBody';
+		this.spinnerSelector = '#modalDialog-{!name} > #spinner';
+		this.jqText = j$(this.textMessageSelector);
+		this.jqForm = j$(this.formBodySelector);
+		this.jqSpinner = j$(this.spinnerSelector);
+		this.jqDialog = j$(this.selector).dialog(
+			{
+				modal: true,
+				autoOpen: false,
+				title: "Dialog",
+				zIndex: -1
+			}
+		);
+	}
+
+	{!name}Dialog.prototype = {
+		/*
+			Modal dialog form for data input.
+		*/
+		form: function ( saveCallback, cancelCallback, closeCallback ){
+			this.jqDialog.dialog("option", "title", "{!name}");
+			this.jqDialog.dialog("option", "width", 1100);
+			j$("#formBody form .bPageBlock").css({"display": "inline-block", "min-width": "80em"});
+			this.jqDialog.dialog("option", "height", "auto");
+
+			this.jqDialog.dialog("option", "buttons",
+				{
+
+					"Save": function() {
+						if(saveCallback && typeof saveCallback === 'function') saveCallback();
+					},
+					"Cancel": function() {
+						if(cancelCallback && typeof cancelCallback === 'function') cancelCallback();
+						j$(this).dialog("close");
+					}
+				}
+			);
+			this.jqDialog.unbind("dialogclose");
+			this.jqDialog.bind("dialogclose",
+				function(event, ui){
+					if(closeCallback && typeof closeCallback === 'function') closeCallback();
+				}
+			);
+			this.hideInfo();
+			this.hideSpinner();
+			this.showForm();
+			if(!this.jqDialog.dialog("isOpen")) this.jqDialog.dialog( "open" );
+			this.jqDialog.dialog("option", "position", "center");
+
+		},
+
+		/*
+			Modal dialog that can show message and close it self after timeout
+		*/
+		info: function(message, timeout, closeCallback){
+			this.hideForm();
+			this.jqText.html('<p>'+message+'</p>');
+			this.showSpinner();
+
+			this.jqDialog.dialog("option", "title", "{!name}");
+			this.jqDialog.dialog("option", "width", 300);
+			this.jqDialog.dialog("option", "height", "auto");
+			this.jqDialog.dialog("option", "buttons",
+				{
+					"Ok": function() {
+						j$(this).dialog("close");
+					}
+				}
+			);
+			this.jqDialog.unbind("dialogclose");
+			this.jqDialog.bind("dialogclose",
+				function(event, ui){
+					if(closeCallback && typeof closeCallback === 'function') closeCallback();
+				}
+			);
+			if(timeout){
+				this.jqDialog.unbind("dialogopen");
+				this.jqDialog.bind("dialogopen",
+					function(event, ui){
+						setTimeout("{!name}.jqDialog.dialog('close')", timeout);
+					}
+				);
+			}
+			else{
+				this.jqDialog.unbind("dialogopen");
+			}
+
+			this.showInfo();
+			if(!this.jqDialog.dialog("isOpen")){
+				this.jqDialog.dialog( "open" );
+			}
+			this.jqDialog.trigger('dialogopen');
+			this.jqDialog.dialog("option", "position", "center");
+		},
+		hideInfo: function(){
+			this.jqText.hide();
+		},
+		showInfo: function(){
+			this.jqText.show();
+		},
+		hideForm: function(){
+			this.jqForm.hide();
+		},
+		showForm: function(){
+			this.jqForm.show();
+			//focus on the first input element of the form
+			j$('#formBody form').find('button,input,textarea,select').filter(':not(:hidden,[type=hidden])').get(0).focus();
+		},
+		showSpinner: function(){
+			this.jqSpinner.show();
+		},
+		hideSpinner: function(){
+			this.jqSpinner.hide();
+		},
+		close: function(){
+			this.jqDialog.dialog("close");
+			this.jqText.html('');
+		},
+		cleanDOM: function(){
+			j$(this.selector).parent('[role="dialog"]').remove();
+			j$(this.selector).remove();
+		}
+
+	}
+	j$(document).ready(
+		function(){
+			{!name} = new {!name}Dialog();
+		}
+	);
+
+	</script>
+	<div id="modalDialog-{!name}" title="Title" style="display:none;">
+		<span id="textMessage" style="position:absolute; display:block;">
+		</span>
+		<div id="spinner"></div>
+		<span id="formBody">
+			<apex:componentBody />
+		</span>
+	</div>
+
+</apex:component>

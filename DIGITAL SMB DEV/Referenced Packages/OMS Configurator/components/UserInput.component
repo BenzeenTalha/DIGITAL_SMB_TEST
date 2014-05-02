@@ -1,0 +1,37 @@
+<apex:component access="global">
+  <apex:attribute name="rowClasses" type="String" description="CSS classes for table cell in standard configuration screens"/>
+  <apex:attribute name="styleClass" type="String" description="CSS classes for visual control element" access="global"/>
+  <apex:attribute name="attr" type="cscfgc.Attribute" description="Attribute to render" access="global"/>
+  <apex:attribute name="required" type="Boolean" description="Is attribute required"/>
+  <apex:attribute name="errors" type="cscfgc.FieldMessage[]" description="Error messages" />
+  <apex:attribute name="autoStyling" type="Boolean" description="Use SFDC internal styling" access="global"/>
+  <apex:attribute name="onchange" type="String" description="OnChange handler" access="global"/>
+  
+  <apex:outputPanel layout="none" rendered="{!not(autoStyling)}">
+	<apex:outputPanel styleClass="attrWrapper" rendered="{!attr.definition.cscfgc__Text_input_lines__c < 2}">
+		<input type="text" class="cfgAttr {!styleClass}" id="{!attr.absoluteReference.asId}" name="{!attr.absoluteReference.asId}" value="{!attr.singleLineValue}" onchange="CS.rules.evaluateAllRules()"/>
+	</apex:outputPanel>
+	<apex:outputPanel layout="block" styleClass="attrWrapper" rendered="{!nullvalue(attr.definition.text_input_lines__c, 1) > 1}">
+		<textarea class="cfgAttr {!styleClass}" style="width: 80%" id="{!attr.absoluteReference.asId}" name="{!attr.absoluteReference.asId}" onchange="CS.rules.evaluateAllRules()" rows="{!attr.definition.text_input_lines__c}">{!attr.value}</textarea>
+	</apex:outputPanel>
+	<apex:outputText value="{!attr.propertiesAsHtml}" escape="false" />
+  </apex:outputPanel>
+
+  <apex:outputPanel layout="none" rendered="{!autoStyling}">
+	  <td class="dataCol attrWrapper {!rowClasses}">
+	    <div class="{!if(required, 'requiredInput', '')}">
+	        <div class="requiredBlock" />
+	        <apex:outputPanel rendered="{!attr.definition.cscfgc__Text_input_lines__c < 2}">
+	            <input type="text" class="cfgAttr {!styleClass}" id="{!attr.absoluteReference.asId}" name="{!attr.absoluteReference.asId}" value="{!attr.singleLineValue}" onchange="CS.rules.evaluateAllRules()"/>
+	        </apex:outputPanel>
+	        <apex:outputPanel layout="none" rendered="{!nullvalue(attr.definition.text_input_lines__c, 1) > 1}">
+	        	<div>
+		            <textarea class="cfgAttr {!styleClass}" style="width: 80%" id="{!attr.absoluteReference.asId}" name="{!attr.absoluteReference.asId}" onchange="CS.rules.evaluateAllRules()" rows="{!attr.definition.text_input_lines__c}">{!attr.value}</textarea>
+	        	</div>
+	        </apex:outputPanel>
+	    </div>
+		<apex:outputText value="{!attr.propertiesAsHtml}" escape="false" />
+	    <c:ErrorMessage errors="{!errors}" field="{!attr.absoluteReference.asId}" />
+	  </td>
+	</apex:outputPanel>
+</apex:component>

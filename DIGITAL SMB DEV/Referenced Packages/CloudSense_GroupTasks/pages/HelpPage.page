@@ -1,0 +1,169 @@
+<apex:page controller="CS_GT.HelpPageController" showheader="false" tabStyle="Group_Tasks__tab"> 
+<apex:sectionHeader title="Help page for Group Tasks Application!"/>
+  <apex:form >
+      <apex:pageBlock >
+          <h1>Description</h1>
+              <p>Tasks functionality in Salesforce is quite powerful, however it fails to deliver on one very important business 
+                 need and that is the ability to assign one single task to a group of users and have any user from within 
+                 that group be able to action that task.</p>
+              <p>The Group Tasks functionality from CloudSense has gone a long way in fullfiling this business need. Using this 
+                 Visual force application, it is now possible to associate a task with a group or queue. Any member of the group 
+                 or queue, even if they are not the owner of the task, can then pick up the task and act on it. This functionality 
+                 works with both workflow generated as well as manually generated tasks. In a very similar way to how the standard 
+                 task functionality works in Salesforce, group members will also be alerted to overdue tasks associated with groups 
+                 they belong to. </p>
+      </apex:pageBlock>
+      
+      <apex:pageBlock >
+          <h1>Video tutorial</h1>
+              <p>Please <apex:outputLink value="http://www.cloudsensesolutions.com/demos/grouptasks/"><b>click here</b></apex:outputLink> to see a video demonstration of how Group Tasks are setup and used in Salesforce.</p> 
+      </apex:pageBlock>
+      
+    <apex:pageBlock id="workflowInstructions" mode="detail">  
+          <apex:pageblockSection rendered="{!IF(renderWorkflowInstructions,true,false)}"> 
+                  <h1>Creating a Group task using Salesforce workflow</h1>
+                  
+                   <p>
+                       <table width="1200" frame="below"> 
+                           <tr>
+                              <td>Start by creating a workflow rule  
+                                  <p>Go to: <b>setup - Create - Workflow and Approvals - Workflow Rules.</b></p>
+                              </td>
+                              <td width="75%" align="left"><img src="{!$Resource.A1}"/></td>
+                            </tr> 
+                       </table>
+                   </p>
+                                      
+                   <p>
+                       <table width="1200" frame="below"> 
+                           <tr>
+                              <td>Select an object on which your workflow will be applied.</td>
+                              <td width="75%" align="left"><img src="{!$Resource.A2}"/> </td>
+                           </tr>
+                       </table>
+                   </p>                         
+                                                               
+                   <p>
+                       <table width="1200" frame="below">
+                           <tr>
+                              <td>Setup the workflow rule and its criteria.</td> 
+                              <td width="75%" align="left"><img src="{!$Resource.A3}"/></td>
+                              
+                           </tr>
+                       </table>
+                   </p> 
+                                    
+                   <p> 
+                       <table width="1200" frame="below"> 
+                           <tr>
+                               <td>Add a task as the an action to the workflow rule. 
+                                     <p>Go to: <b>Add workflow action - New Task</b></p>
+                               </td>
+                               <td width="75%" align="left"><img src="{!$Resource.A4}"/> </td>
+                           </tr>
+                       </table>    
+                   </p>    
+                        
+                   <p>
+                       <table width="1200" frame="below">
+                           <tr>
+                               <td>Set the user or role this wokflow should be assigned to. (This is mandatoy Salesforce functionality)
+                               	   <p>To associate this task with a group add the &lt;Associated Group&gt; tag to the task comment.</p>
+                               	   <p>For example:  <b>&lt;Associated Group&gt;Sales Group&lt;/Associated Group&gt;</b></p>  
+                               	   <p>Where "Sales Group" is the name of a Salesforce public group</p>
+                               	   <p>Note: In this example we are setting the due date to be the created date minus 2 days to force 
+                               	   the task to be immediately overdue on creation. This is done for demonstration purposes only.</p>
+                               </td>
+                               <td width="75%" align="left"><img src="{!$Resource.A5}"/></td>
+                               
+                           </tr>
+                       </table>
+                   </p>             
+                                     
+                   <p>
+                       <table width="1200" frame="below">
+                           <tr>
+                               <td>Press done to finish the process.</td>    
+                               <td width="75%" align="left"><img src="{!$Resource.A6}"/></td>  
+                           </tr>
+                       </table>
+                   </p>
+                                
+                   <p>
+                       <table width="1200" frame="below">
+                           <tr>
+                               <td>Activate the workflow rule</td>
+                               <td width="75%" align="left"><img src="{!$Resource.A7}"/></td>
+                               
+                           </tr>
+                       </table>
+                   </p>         
+                  
+                   <p>
+                       <table width="1200" frame="below">
+                           <tr>
+                               <td>Test the workflow rule. In the example shown here we will test the workflow rule 
+                               	   by creating an account and setting it to active. 
+                                   This will trigger the workflow and send the created task.
+                               </td>       
+                               <td width="75%" align="left"><img src="{!$Resource.A8}"/> </td>
+                           </tr>    
+                       </table>  
+                   </p>
+                   
+                   <p>
+                       <table width="1200" frame="below">
+                           <tr>
+                               <td>Switch user and login as a user who is a member of the Sales Group.  
+                                     <p> Once logged in you will see that in the sidebar we have a new component <b>"Group Task Alerts"</b>.</p> 
+                                     <p>This component displays the number of overdue tasks. This serves as a reminder on all screens 
+                                     	that there are outstanding group tasks.</p>
+                                     <p>Note: to make sure that the "Group task Alerts" component is included in the side bar, you must add 
+                                        it to the home page layout. You should also ensure that components in the side bar are displayed on all 
+                                        pages (see "user interface" settings)</p>
+                               </td>
+                               <td width="75%" align="left"><img src="{!$Resource.A8a}"/></td>
+                               
+                           </tr>
+                       </table>
+                   </p>   
+                   
+                   <p>
+                       <table width="1200" frame="below">
+                           <tr>
+                               <td>A popup alert is also presented to the user to alert them of any overdue tasks. The popup can be 
+                               dismissed for the rest of the session. 
+                                   <p>The user can navigate to the details screen of an overdue group task from this popup</p>
+                               </td>
+                               <td width="75%" align="left"><img src="{!$Resource.A9}"/></td>
+                               
+                           </tr>
+                       </table>
+                   </p>                     
+                          
+                   <p>
+                       <table width="1200" frame="below">
+                           <tr>
+                               <td>The details screen of the group task shows the group that this task is associated as well as the user 
+                               that was assigned to the task.</td>
+                               <td width="75%" align="left"><img src="{!$Resource.A10}"/></td>   
+                           </tr>
+                       </table>
+                   </p>            
+                     
+                   <p>
+                       <table width="1200" frame="below">
+                           <tr>
+                               <td>The "Group Tasks" tab is used to manage all group tasks available to the currently logged in user.  
+                               <p>Note: You may modify the number of results per page by editing the "Number of records per page" field 
+                               on the "Constants" custom setting.</p>
+                               </td>
+                               <td width="75%" align="left"><img src="{!$Resource.A11}"/></td>
+                           </tr>
+                       </table>
+                   </p>        
+                         
+          </apex:pageblockSection>   
+      </apex:pageBlock>
+  </apex:form>
+</apex:page>

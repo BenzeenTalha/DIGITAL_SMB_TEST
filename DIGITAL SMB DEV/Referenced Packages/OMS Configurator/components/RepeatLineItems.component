@@ -1,0 +1,6 @@
+<apex:component controller="cscfgc.RepeatLineItemsController" access="global">
+	<apex:attribute name="config" assignTo="{!config}" type="cscfgc__Product_Configuration__c" description="The Configuration" required="true" access="global"/>
+	<apex:repeat var="item" value="{!lineItems}">
+		<apex:componentBody />
+	</apex:repeat>
+</apex:component>

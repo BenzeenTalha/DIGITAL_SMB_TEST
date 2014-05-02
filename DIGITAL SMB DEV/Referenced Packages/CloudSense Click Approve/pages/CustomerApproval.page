@@ -1,0 +1,120 @@
+<apex:page StandardController="CSCAP__Customer_Approval__c"  cache="false" extensions="CSCAP.CustomerApprovalController" showHeader="false" sideBar="false">
+	<html>
+	    <head>
+	        <title>{!SitesApprovalTitle}</title>
+	        <style type="text/css">
+	            body {
+	                font: 8pt/1.3 sans-serif;
+	                margin-top: 1.0cm;
+	                margin-left: 1.5cm;
+	                margin-right: 1.5cm;
+	                margin-bottom: 1.0cm;
+	            }
+	        </style>
+	    </head>
+	    <body>
+		<apex:form >
+	        <apex:pageBlock tabStyle="Click_Approve_Setting__c" Title="{!SitesApprovalTitle}">
+	            <apex:pageMessages />
+	            <apex:pageBlockButtons >
+	                <apex:commandButton value="Approve" action="{!approve}" rendered="{!IF(AllowApproval && ValidPIN,true,false)}"/>
+	                <apex:commandButton value="Decline" action="{!decline}" rendered="{!IF(AllowApproval && ValidPIN,true,false)}"/>
+	                <apex:commandButton value="Create Variation Request" action="{!createVariationRequest}" rendered="{!IF(AllowApproval && ValidPIN && $Setup.ClickApprove_Constants__c.Allow_Variation_Requests__c,true,false)}"/>
+		            <apex:commandButton value="Validate PIN" action="{!validatePIN}" rendered="{!NOT(ValidPIN)}"/>
+	            </apex:pageBlockButtons>
+	            <apex:outputPanel rendered="{!NOT(ValidPIN)}">
+		            <apex:pageBlockSection title="Enter PIN" columns="1" showHeader="false">
+		            	<apex:outputPanel >
+		            		<b>Please enter your PIN: </b>
+		            		<apex:inputText value="{!enteredPIN}"/>
+		            		<apex:outputPanel rendered="{!$Setup.ClickApprove_Constants__c.Display_Account_Manager__c}">
+								<p>Please contact your account manager <a href="mailto:{!AccountManagerEmail}"><b>{!AccountManagerName}</b></a> for further information.</p>
+							</apex:outputPanel>
+		            		<apex:outputPanel rendered="{!$Setup.ClickApprove_Constants__c.Display_Opportunity_Owner__c}">
+								<p>Please contact your sales representative <a href="mailto:{!OpportunityOwnerEmail}"><b>{!OpportunityOwnerName}</b></a> for further information.</p>
+							</apex:outputPanel>
+		            	</apex:outputPanel>
+		            </apex:pageBlockSection>
+	            </apex:outputPanel>
+	            <apex:outputPanel rendered="{!ValidPIN}">
+					<apex:pageBlockSection title="Approval Details" columns="1" showHeader="false" rendered="{!AllowApproval}">
+						<apex:outputPanel >
+							<apex:outputText value="{!SitesApprovalHeader}" escape="false"/>
+		            		<apex:outputPanel rendered="{!$Setup.ClickApprove_Constants__c.Display_Account_Manager__c}">
+								<p>Please contact your account manager <a href="mailto:{!AccountManagerEmail}"><b>{!AccountManagerName}</b></a> for further information.</p>
+							</apex:outputPanel>
+		            		<apex:outputPanel rendered="{!$Setup.ClickApprove_Constants__c.Display_Opportunity_Owner__c}">
+								<p>Please contact your sales representative <a href="mailto:{!OpportunityOwnerEmail}"><b>{!OpportunityOwnerName}</b></a> for further information.</p>
+							</apex:outputPanel>
+						</apex:outputPanel>
+						<apex:outputPanel rendered="{!$Setup.ClickApprove_Constants__c.Display_Comments_Field__c}">
+							<p><b>Customer comments:</b></p> 
+							<apex:inputTextarea id="customerComment" cols="100" rows="15" value="{!customerApproval.CSCAP__Customer_comment__c}"/>
+							<p/>
+						</apex:outputPanel>
+					</apex:pageBlockSection>
+					<apex:pageBlockSection title="Approver Physical Signature" columns="2" showHeader="True" rendered="{!AllowApproval && $Setup.ClickApprove_Constants__c.Collect_Physical_Signature__c}">
+		            	<apex:pageBlockSectionItem >
+		            		<apex:outputPanel >
+		            			<apex:inputfile value="{!approverSignature.body}" filename="{!approverSignature.Name}" />
+		            			<apex:commandbutton value="Load Approver Signature" action="{!loadApproverSignature}"/>
+		            		</apex:outputPanel>
+		            	</apex:pageBlockSectionItem>
+		            	<apex:pageBlockSectionItem >
+		            		<apex:outputPanel >
+		            			<b>Signatory's name: </b>
+		          				<apex:inputText value="{!customerApproval.CSCAP__Approver_Name__c}" id="approverName" />
+		          			</apex:outputPanel>
+		          		</apex:pageBlockSectionItem>
+		          		<apex:pageBlockSectionItem rendered="{!IF(signatureImageId != '',true,false)}">
+		            		<apex:outputPanel >
+		          				<apex:image id="theImage" value="{!URLFOR($Action.Attachment.Download, signatureImageId)}"/>
+		            			<apex:commandbutton value="Delete Approver Signature" action="{!deleteApproverSignature}"/>
+		            		</apex:outputPanel>
+		          		</apex:pageBlockSectionItem>
+		          	</apex:pageBlockSection>
+					<apex:pageBlockSection title="Documents to Approve" columns="1" showHeader="True" rendered="{!AllowApproval}">
+						<apex:pageBlockSectionItem >
+					        <apex:pageBlockTable value="{!customerApproval.Attachments}" var="file">
+					        	<apex:column headerValue="Action">
+					        		<a href="{!URLFOR($Action.Attachment.Download, file.Id)}"><b>Download</b></a>
+					        	</apex:column>
+					            <apex:column value="{!file.Name}"/>
+					            <apex:column value="{!file.contentType}"/>
+					        </apex:pageBlockTable>
+						</apex:pageBlockSectionItem> 
+					</apex:pageBlockSection>
+					<apex:pageBlockSection title="Variation Requests" columns="1" showHeader="True" rendered="{!AllowApproval && $Setup.ClickApprove_Constants__c.Allow_Variation_Requests__c}">
+						<apex:pageBlockSectionItem >
+					        <apex:pageBlockTable value="{!customerApproval.Variation_Requests__r}" var="vr">
+					        	<apex:column headerValue="Action">
+					        		<b>
+					        			<apex:commandLink action="{!editVariationRequest}" value="Edit" id="editCommandLink">
+					        				<apex:param name="requestVariationId" assignTo="{!requestVariationId}" value="{!vr.Id}" />
+					        			</apex:commandLink>
+					        		</b> | 
+					        		<b>
+					        			<apex:commandLink action="{!deleteVariationRequest}" value="Del" id="deleteCommandLink">
+					        				<apex:param name="requestVariationId" assignTo="{!requestVariationId}" value="{!vr.Id}" />
+					        			</apex:commandLink>
+					        		</b>
+					        	</apex:column>
+					            <apex:column value="{!vr.CSCAP__Section_Clause__c}"/>
+					            <apex:column value="{!vr.CSCAP__Variation_Request_Details__c}"/>
+					        </apex:pageBlockTable>
+						</apex:pageBlockSectionItem> 
+					</apex:pageBlockSection>
+					<apex:pageBlockSection title="Approval Details" columns="1" showHeader="false" rendered="{!NOT(AllowApproval)}">
+						<apex:outputPanel rendered="{!$Setup.ClickApprove_Constants__c.Display_Account_Manager__c}">
+							<p>This record has already been {!ApprovedOrRejected}. Please contact your account manager <a href="mailto:{!AccountManagerEmail}"><b>{!AccountManagerName}</b></a> for further information.</p>
+						</apex:outputPanel>
+						<apex:outputPanel rendered="{!$Setup.ClickApprove_Constants__c.Display_Opportunity_Owner__c}">
+							<p>This record has already been {!ApprovedOrRejected}. Please contact your sales representative <a href="mailto:{!OpportunityOwnerEmail}"><b>{!OpportunityOwnerName}</b></a> for further information.</p>
+						</apex:outputPanel>
+					</apex:pageBlockSection>
+				</apex:outputPanel>
+			</apex:pageBlock>
+		</apex:form>
+		</body>
+	</html>
+</apex:page>

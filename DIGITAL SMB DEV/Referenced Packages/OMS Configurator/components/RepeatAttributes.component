@@ -1,0 +1,12 @@
+<apex:component controller="cscfgc.RepeatAttributesController" access="global">
+	<apex:attribute name="parentController" assignTo="{!parentController}" type="cscfgc.ProductConfiguratorController" required="true" description="The ProductConfiguratorController instance" access="global"/>
+	<apex:attribute name="section" assignTo="{!section}" type="String" required="false" description="(Optional) Selects only the attributes in the specified screen section" access="global"/>
+	<apex:attribute name="name" assignTo="{!attributeName}" type="String" required="false" description="(Optional} Specify a single attribute name to be found in this screen section" access="global"/>
+
+	<apex:repeat var="attr" value="{!attributes}">
+		<apex:componentBody >
+			<apex:variable var="attribute" value="{!attr}" />
+			<!-- c:OutputAttributeProperties attr="{!attr}" /-->
+		</apex:componentBody>
+	</apex:repeat>
+</apex:component>

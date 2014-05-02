@@ -1,0 +1,81 @@
+<apex:component >
+	<apex:attribute name="parentController" type="cscfgc.ProductConfiguratorController" required="false" description="Parent controller" />
+
+	<apex:outputPanel layout="block" styleClass="bPageTitle" rendered="{!not(isblank(parentController.config.currentScreen)) && parentController.config.currentScreen.cscfgc__Show_Product_Configuration_header__c}">
+		<div class="ptBody secondaryPalette">
+			<div class="content"><img src="/s.gif" alt="Opportunity" class="pageTitleIcon" title="Opportunity"></img>
+				<h1 class="pageType">Product Configuration Edit<span class="titleSeparatingColon">:</span></h1>
+				<h2 class="pageDescription">New Product Configuration</h2>
+				<div class="blank">&nbsp;</div>
+			</div>
+			<div class="links"><a href="#" title="Help for this Page (New Window)"><span class="helpLink">Help
+			for this Page</span><img src="/s.gif" alt="Help" class="helpIcon" title="Help"></img></a>
+			</div>
+		</div>
+	</apex:outputPanel>
+
+	<apex:repeat var="ancestor" value="{!parentController.config.ancestors}">
+		<apex:outputPanel layout="block" style="margin: 8px 0 16px" rendered="{!ancestor.productDefinition.id != parentController.config.productDefinition.id}">
+						
+			<apex:repeat var="screen" value="{!ancestor.screens}">
+
+				<apex:outputPanel layout="none" rendered="{!screen.sObj.cscfgc__Index__c != ancestor.currentScreen.cscfgc__Index__c}">
+					<apex:commandLink action="{!parentController.updateAndSelectConfig}" onclick="CS.rules.evaluateAllRules()">
+						<apex:param name="screenIndex" assignTo="{!parentController.screenIndex}" value="{!screen.sObj.cscfgc__Index__c}" />
+						<apex:param name="reference" assignTo="{!parentController.reference}" value="{!ancestor.reference.asString}" />
+						{!screen.sObj.name}
+                    </apex:commandLink>
+				</apex:outputPanel>
+
+				<apex:outputPanel rendered="{!screen.sObj.cscfgc__Index__c == ancestor.currentScreen.cscfgc__Index__c}">
+					<apex:commandLink action="{!parentController.updateAndSelectConfig}" onclick="CS.rules.evaluateAllRules()">
+						<apex:param name="screenIndex" assignTo="{!parentController.screenIndex}" value="{!screen.sObj.cscfgc__Index__c}" />
+						<apex:param name="reference" assignTo="{!parentController.reference}" value="{!ancestor.reference.asString}" />
+						<span style="font-weight: bold">{!screen.sObj.name}</span>
+                    </apex:commandLink>
+                </apex:outputPanel>
+
+				<apex:outputPanel rendered="{!not(isnull(screen.validation))}">
+					&nbsp;
+					<apex:outputPanel rendered="{!screen.validation.isValid}"><img src="{!URLFOR($Resource.cscfgc__ok_icon)}" style="vertical-align: -2px"/></apex:outputPanel>
+					<apex:outputPanel rendered="{!not(screen.validation.isValid)}"><img src="{!URLFOR($Resource.cscfgc__warning_icon)}" style="vertical-align: -2px"/></apex:outputPanel>
+				</apex:outputPanel> 
+
+				<apex:outputText value="&nbsp;&gt; " escape="false" rendered="{!screen.sObj.cscfgc__Index__c != ancestor.lastScreen.cscfgc__Index__c}" />
+
+			</apex:repeat>
+
+		</apex:outputPanel>
+	</apex:repeat>
+	<div style="display: none">
+		<img id="screenValidIcon" src="{!URLFOR($Resource.ok_icon)}" />
+		<img id="screenInvalidIcon" src="{!URLFOR($Resource.warning_icon)}" />
+	</div>
+	
+
+	<apex:outputPanel layout="block" styleClass="ptBreadcrumb" style="margin: 8px 0 16px">
+		<apex:outputPanel rendered="{!parentController.config.currentScreen != null}">
+			<apex:repeat var="screen" value="{!parentController.config.screens}">
+				<!-- <apex:outputText value="{0, number, #0.}">
+					<apex:param value="{!screen.sObj.Index__c + 1}" />
+				</apex:outputText>
+				&nbsp; -->
+				<apex:outputPanel layout="none" rendered="{!screen.sObj.cscfgc__Index__c != parentController.config.currentScreen.cscfgc__Index__c}">
+					<apex:commandLink action="{!parentController.selectScreen}" onclick="CS.rules.evaluateAllRules()">
+						<apex:param name="screenIndex" assignTo="{!parentController.screenIndex}" value="{!screen.sObj.cscfgc__Index__c}" />{!screen.sObj.name}
+                    </apex:commandLink>
+				</apex:outputPanel>
+				<apex:outputPanel rendered="{!screen.sObj.cscfgc__Index__c == parentController.config.currentScreen.cscfgc__Index__c}">
+					<span style="font-weight: bold">{!screen.sObj.name}</span>
+                </apex:outputPanel>
+				<apex:outputPanel rendered="{!not(isnull(screen.validation))}">
+					&nbsp;
+					<apex:outputPanel rendered="{!screen.validation.isValid}"><img id="{!IF(screen.sObj.cscfgc__Index__c == parentController.config.currentScreen.cscfgc__Index__c, 'currentScreenValidIndicator', '')}" src="{!URLFOR($Resource.cscfgc__ok_icon)}" style="vertical-align: -2px"/></apex:outputPanel>
+					<apex:outputPanel rendered="{!not(screen.validation.isValid)}"><img id="{!IF(screen.sObj.cscfgc__Index__c == parentController.config.currentScreen.cscfgc__Index__c, 'currentScreenValidIndicator', '')}" src="{!URLFOR($Resource.cscfgc__warning_icon)}" style="vertical-align: -2px"/></apex:outputPanel>
+				</apex:outputPanel> 
+				<apex:outputText value="&nbsp;&nbsp;&gt;&nbsp;&nbsp;" escape="false" rendered="{!screen.sObj.cscfgc__Index__c != parentController.config.lastScreen.cscfgc__Index__c}" />
+			</apex:repeat>
+		</apex:outputPanel>
+	</apex:outputPanel>
+
+</apex:component>

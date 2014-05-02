@@ -1,0 +1,47 @@
+<apex:component allowDML="true">
+    <apex:attribute name="parentController" type="cscfgc.ProductConfiguratorController" required="true" description="Page controller"/>
+    <apex:form >
+
+	
+    
+        <apex:pageBlock title="{!parentController.category.name} - Products" rendered="{!parentController.numDefinitions > 0}">
+        
+            <apex:pageBlockTable var="definition" value="{!parentController.definitions}">
+                <apex:column >
+                    <apex:facet name="header">Product Name</apex:facet>
+                    <apex:commandLink action="{!parentController.selectDefinition}" value="{!definition.name}" onClick="CS.executePreSubmissionTasks('//');">
+                        <apex:param name="definitionId" assignTo="{!parentController.definitionId}" value="{!definition.id}" />
+                    </apex:commandLink>
+                </apex:column>
+
+                <apex:column >
+                    <apex:facet name="header">Description</apex:facet>
+                    {!definition.cscfgc__Description__c}
+                </apex:column>
+            </apex:pageBlockTable>
+
+         </apex:pageBlock>
+
+
+			<br />	
+
+        <apex:pageBlock title="{!parentController.category.name} - Offers" >
+            <apex:pageBlockTable var="offer" value="{!parentController.offers}">
+                <apex:column >
+                    <apex:facet name="header">Offer Name</apex:facet>
+                    <apex:commandLink action="{!parentController.selectDefinition}" value="{!offer.name}" onClick="CS.executePreSubmissionTasks('//');">
+                        <apex:param name="offerId" assignTo="{!parentController.offerId}" value="{!offer.id}" />
+                    </apex:commandLink>
+                </apex:column>
+
+                <apex:column >
+                    <apex:facet name="header">Description</apex:facet>
+                    {!offer.cscfgc__Description__c}
+                </apex:column>
+ 
+            </apex:pageBlockTable>
+
+        </apex:pageBlock>
+ 
+    </apex:form>
+</apex:component>

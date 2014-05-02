@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Follow</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
+    <customHelpPage>HelpOverride</customHelpPage>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Provides a mapping between CloudSense product configuration options and the required DISE codes for Broadband services</description>
+    <enableActivities>false</enableActivities>
+    <enableEnhancedLookup>false</enableEnhancedLookup>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>false</enableHistory>
+    <enableReports>true</enableReports>
+    <fields>
+        <fullName>Attribute_Name__c</fullName>
+        <description>Name of the specific CloudSense attribute that corresponds to a DISE service (input)</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Name of the specific CloudSense attribute that corresponds to a DISE service (input)</inlineHelpText>
+        <label>Attribute Name</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Attribute_Value__c</fullName>
+        <description>The selected value of the specified CloudSense attribute that identifies a specific DISE service (input)</description>
+        <externalId>false</externalId>
+        <inlineHelpText>The selected value of the specified CloudSense attribute that identifies a specific DISE service (input)</inlineHelpText>
+        <label>Attribute Value</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Bundle_Type__c</fullName>
+        <description>Type of broadband offering, such as Home Office, Office 10, or Access (input)</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Type of broadband offering, such as Home Office, Office 10, or Access (input)</inlineHelpText>
+        <label>Bundle Type</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Change_Reference__c</fullName>
+        <description>Used to capture creation or change information related to the mapping entry</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Used to capture creation or change information related to the mapping entry</inlineHelpText>
+        <label>Change Reference</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Comments__c</fullName>
+        <description>Administrative notes relating to the lookup entry</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Administrative notes relating to the lookup entry</inlineHelpText>
+        <label>Comments</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Effective_Date__c</fullName>
+        <description>start date for service code</description>
+        <externalId>false</externalId>
+        <label>Effective Date</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>Expiry_Date__c</fullName>
+        <description>Date of sale expiry for the service</description>
+        <externalId>false</externalId>
+        <label>Expiry Date</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>Free_Of_Charge__c</fullName>
+        <description>Indicates whether the package includes a free of charge period (Yes/No) (input)</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Indicates whether the package includes a free of charge period (Yes/No) (input)</inlineHelpText>
+        <label>Free Of Charge</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Line_Type__c</fullName>
+        <description>Type of line, for example, ADSL or SDSL (input)</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Type of line, for example, ADSL or SDSL (input)</inlineHelpText>
+        <label>Line Type</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Manual_Mapping__c</fullName>
+        <defaultValue>false</defaultValue>
+        <description>Flag to indicate whether the mapping entry has been created manually. These types of entries may need additional verification.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Flag to indicate whether the mapping entry has been created manually. These types of entries may need additional verification.</inlineHelpText>
+        <label>Manual Mapping</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>O2_Customer__c</fullName>
+        <description>Indicates whether the package is for an O2 or non-O2 customer (Yes=O2 Customer/No=Not a customer) (input)</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Indicates whether the package is for an O2 or non-O2 customer (Yes=O2 Customer/No=Not a customer) (input)</inlineHelpText>
+        <label>O2 Customer</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Package_Code__c</fullName>
+        <description>DISE package code resulting from the selected care level, line type, and number of channels</description>
+        <externalId>false</externalId>
+        <inlineHelpText>DISE package code resulting from the selected care level, line type, and number of channels</inlineHelpText>
+        <label>Package Code</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Price__c</fullName>
+        <description>the cost in £ for the service</description>
+        <externalId>false</externalId>
+        <label>Price</label>
+        <precision>10</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Service_Bill_Label__c</fullName>
+        <description>Descriptive value for the service code, used for information only</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Descriptive value for the service code, used for information only</inlineHelpText>
+        <label>Service Bill Label</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Service_Code__c</fullName>
+        <description>DISE service code resulting from either the selected care level, minutes and price, or from the attribute name/value combination</description>
+        <externalId>false</externalId>
+        <inlineHelpText>DISE service code resulting from either the selected care level, minutes and price, or from the attribute name/value combination</inlineHelpText>
+        <label>Service Code</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Service_Type__c</fullName>
+        <description>Used when multiple service codes are required for a single attribute and selection combination (input)</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Used when multiple service codes are required for a single attribute and selection combination (input)</inlineHelpText>
+        <label>Service Type</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Tariff_Code__c</fullName>
+        <description>DISE tariff code, which is based on the business type (input)</description>
+        <externalId>false</externalId>
+        <inlineHelpText>DISE tariff code, which is based on the business type (input)</inlineHelpText>
+        <label>Tariff Code</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <label>O2 DISE Map Broadband</label>
+    <nameField>
+        <displayFormat>{000000}</displayFormat>
+        <label>O2 DISE Map Broadband Name</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>O2 DISE Map Broadband</pluralLabel>
+    <searchLayouts/>
+    <sharingModel>Read</sharingModel>
+    <startsWith>Vowel</startsWith>
+</CustomObject>

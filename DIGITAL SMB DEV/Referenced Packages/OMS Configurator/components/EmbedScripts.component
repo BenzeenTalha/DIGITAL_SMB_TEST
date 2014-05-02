@@ -1,0 +1,19 @@
+<apex:component controller="cscfgc.EmbedScriptsController" access="global">
+	
+	
+	<apex:includeScript value="{!$Resource.cscfgc__jQuery_1_4_2_min}" />
+	<apex:includeScript value="{!$Resource.cscfgc__Chosen_JQuery}" />	
+	<apex:includeScript value="{!$Resource.cscfgc__Underscore}" />	
+	<apex:includeScript value="{!$Resource.cscfgc__cs_core}" />
+	<apex:includeScript value="{!$Resource.cscfgc__cs_quickentry}" />
+	<script type="text/javascript"> 
+		var $j = jQuery.noConflict();
+		if ({!isLoggingEnabled}) CS.enableLogging();
+		if ({!not(isLoadingOverlayEnabled)}) CS.disableLoadingOverlay();
+		CS.setProgressBarImage("{!$Resource.ProgressBar}");		
+	 
+	
+	</script>
+	
+	
+</apex:component>

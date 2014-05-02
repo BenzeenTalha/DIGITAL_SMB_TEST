@@ -1,0 +1,8 @@
+<apex:component controller="cscfgc.ErrorMessageController">
+	<apex:attribute name="field" assignTo="{!fieldReference}"
+		required="required" type="String"
+		description="The field to check for errors" />
+	<apex:attribute name="errors" assignTo="{!errors}" required="required"
+		type="cscfgc.FieldMessage[]" description="The Map of errors to search" />
+	<div class="errorMsg">{!message}</div>
+</apex:component>

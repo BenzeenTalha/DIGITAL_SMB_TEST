@@ -1,0 +1,121 @@
+<apex:component controller="CSPOFA.VisualiserRaphaelController" allowDML="true" id="raphaelVisualiserComponent">
+
+	<apex:attribute id="attributeRecordId" name="recordId" type="Id" required="true" assignTo="{!recordId}" description="Record that you want to visualize. Currently Orchestrator process and process templates are supported." ></apex:attribute>
+	<apex:attribute id="attributeName" name="name" type="String" required="true" description="Component functionality will be available through Javascript object under this name." ></apex:attribute>
+
+
+	<!-- for production -->
+	<apex:includeScript value="{!URLFOR($Resource.CSPOFA__POFRAPHAEL,'min/raphael.min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.CSPOFA__POFDESIGNER,'min/OrchestratorVisualiserRaphael.min.js')}"/>
+	<!---->
+	<!-- for development/debug --
+	<apex:includeScript value="{!URLFOR($Resource.POFRAPHAEL,'js/raphael.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.POFDESIGNER,'js/OrchestratorVisualiserRaphael.js')}"/>
+	<!---->
+
+	<style type="text/css">
+        #graphContainer	{height: 600px; width: 100%; min-width: 100%; border: 1px solid #aaa; overflow-x: auto; overflow-y: hidden; }
+    </style>
+
+	<script type="text/javascript" charset="utf-8">
+		{!name} = {};
+		/*
+			Ajax call to controller in order to save layout.
+		*/
+		{!name}.showMessage = true;
+		{!name}.saveLayout = function(showMessage){
+			if(showMessage != null) {
+				this.showMessage = showMessage;
+			}
+			if(this.showMessage){
+				Info.info('Saving layout...');
+			}
+			if({!name}.graph){
+				var text = {!name}.graph.json();
+				Visualforce.remoting.Manager.invokeAction(
+        			'{!$RemoteAction.VisualiserRaphaelController.saveLayout}',
+					text, "{!recordId}", {!name}.saveLayoutCallback, {escape: false}
+				);
+			}
+		}
+		{!name}.saveLayoutCallback = function(result,event){
+			if(event.status && result == true){
+				if({!name}.showMessage) Info.close();
+			}
+			else{
+				if({!name}.showMessage) Info.info('There was an error, layout NOT saved!');
+			}
+		}
+		/*
+			Ajax call to controller to retrive auto layout.
+			Layout is applied in the callback.
+		*/
+		{!name}.autoLayout = function(showMessage){
+			if(showMessage != null) this.showMessage = showMessage;
+			Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.VisualiserRaphaelController.autoLayout}',
+				"{!recordId}", {!name}.autoLayoutCallback, {escape: false}
+			);
+		}
+		{!name}.autoLayoutCallback = function(result,event){
+			if(event.status){
+				var r = JSON.parse( result );
+				if (r && r.nodes && r.nodes.length) {
+					{!name}.graph.draw(r.nodes,r.links);
+					{!name}.graph.setHeight( r.height );
+					{!name}.graph.setWidth( r.width );
+				}
+				else{
+					{!name}.graph.clear();
+				}
+			}
+			else{
+				if({!name}.showMessage) Info.info('There was an error, auto layout not created!');
+			}
+		}
+		/*
+			Ajax call to controller to retrive last layout
+		*/
+		{!name}.retriveLayout = function(showMessage){
+			if(showMessage != null) this.showMessage = showMessage;
+			Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.VisualiserRaphaelController.retriveLayout}',
+				"{!recordId}", {!name}.retriveLayoutCallback, {escape: false}
+			);
+		}
+		{!name}.retriveLayoutCallback = function(result,event){
+			if(event.status){
+				var r = JSON.parse( result );
+				if (r && r.nodes && r.nodes.length) {
+					{!name}.graph.draw(r.nodes, r.links);
+					{!name}.graph.setHeight( r.height );
+					{!name}.graph.setWidth( r.width );
+				}
+			}
+			else{
+				if({!name}.showMessage) Info.info('There was an error, layouting not succeded!');
+			}
+		}
+		//for window resizing
+		{!name}.resizeTimer = null;
+		{!name}.updateWidth = function() {
+			var width = j$('#'+{!name}.graph.container).width();
+			width = Math.max( {!name}.graph.paper.width, width);
+			{!name}.graph.setWidth( width );
+		}
+		j$(window).resize(function (){
+			clearTimeout({!name}.resizeTimer);
+    		{!name}.resizeTimer = setTimeout({!name}.updateWidth, 100);
+		});
+	</script>
+	<c:ModalDialog id="info" name="Info" />
+	<div id='graphContainer'></div>
+	<script type="text/javascript" charset="utf-8">
+		j$(document).ready(
+			function(){
+				{!name}.graph = new Graph('graphContainer',{!configuration});
+				{!name}.retriveLayout();
+			}
+		);
+	</script>
+</apex:component>

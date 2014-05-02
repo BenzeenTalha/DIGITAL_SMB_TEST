@@ -1,0 +1,78 @@
+<apex:page Controller="cscfgc.CloneConfigController"  showHeader="false"  sidebar="false">
+
+    <!--
+    //#####################################################################
+    //# Apex page to Clone an existing Config to an existing bundle    
+    //# CPS 04/10/2010
+    //#
+    -->
+
+    <apex:form >
+    
+
+
+        <apex:pageBlock title="Copy Configuration">
+
+
+        <apex:pageBlock >
+        <h2>Create a copy of Configuration '{!SourceConfiguration.Name}' within the same Bundle.</h2>
+
+                <apex:pageBlockButtons location="bottom">                   
+                    <apex:commandButton value="Copy Configuration to same bundle" action="{!cloneConfigSame}"  immediate="true" />
+					<apex:commandButton value="Cancel" action="javascript:window.close();" immediate="true"  />
+                </apex:pageBlockButtons>
+
+                <apex:Messages />
+
+        </apex:pageBlock>
+
+
+        <apex:pageBlock >
+        <h2>Copy Configuration '{!SourceConfiguration.Name}'  to another Bundle</h2>
+
+           <br /><br />
+                <table width="90%" cellpadding="1" cellspacing="1">
+                    <tr>
+                        <td><b>Step 1</b> : Select opportunity containing the target Bundle:</td>
+                        <td>
+                            <apex:inputField id="selOpportunity" 
+                                                value="{!tempBundle.cscfgc__Opportunity__c}"   
+                                                required="true" 
+                        />
+                        </td>
+                   </tr>
+                    <tr>
+                        <td><b>Step 2</b> : Get the bundles for the destination Opportunity:</td>
+                        <td>
+                            <apex:commandLink action="{!getBundles}"   title="Get Bundles...">Get Bundles</apex:commandLink> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>Step 3</b> : Select the target Bundle within the chosen Opportunity:</td>
+                        <td> 
+                            <apex:selectList id="selBundle" size="1" value="{!selectedBundle}" >
+                                <apex:selectOptions Value="{!BundleOptions}"></apex:selectOptions>                            
+                            </apex:selectList>
+
+                        </td>
+
+                    </tr>                                        
+                    <tr>
+                        <td><b>Step 4</b> : Click the <i>Copy Configuration</i> button below to start the copy process.</td>
+                        <td>&nbsp; </td>
+
+                    </tr>                                        
+
+                </table>
+
+                <apex:pageBlockButtons location="bottom">                   
+                    <apex:commandButton value="Copy Configuration to specified Bundle" action="{!cloneConfig}"  />
+                    <apex:commandButton value="Cancel" action="javascript:window.openner.refresh(); window.close();" immediate="true"  />
+                </apex:pageBlockButtons>
+                <apex:Messages />
+
+            </apex:pageBlock>
+        </apex:pageBlock>
+    </apex:form>
+
+</apex:page>

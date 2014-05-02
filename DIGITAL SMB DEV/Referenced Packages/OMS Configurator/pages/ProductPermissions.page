@@ -1,0 +1,61 @@
+<apex:page standardController="cscfgc__Product_Definition__c" extensions="cscfgc.ProfilePermissionsProductController">
+
+
+    <apex:form >
+                <apex:pageBlock title="Set access permissions for '{!cscfgc__Product_Definition__c.Name}'" id="blockMain">
+
+                    <!-- buttons -->                    
+                  <apex:pageBlockButtons location="top">
+                           <apex:commandButton action="{!doSave}"  value="Save"></apex:commandButton>
+                           <apex:commandButton action="{!doCancel}"  value="Back to Product Definition" immediate="true"></apex:commandButton>
+                  </apex:pageBlockButtons>
+             
+    
+                  <table>
+                      <tr>
+                          <td width="300">Restrict access for Product Definition</td><td><apex:inputCheckbox id="chkRestrictAccess" value="{!restrictAccess}" /></td>
+                      </tr>                          
+                  </table>
+                   <b><apex:messages /></b>
+                  
+          </apex:pageBlock>
+          
+         <apex:pageBlock id="blockProfile" title="Access permission for profiles" >
+
+                 <div style="width:600px; height:340px; overflow:auto; border:1px">
+        
+                    <apex:pageBlockTable var="item" value="{!SelectedProfiles}">
+                        <apex:column width="50" >
+                            <apex:facet name="header">Access Granted</apex:facet>
+                            <apex:outputPanel >                
+                                <apex:inputCheckbox value="{!item.isSelected}"  selected="{!item.isSelected}"/>
+                            </apex:outputPanel>
+                        </apex:column>
+        
+                        <apex:column width="300">
+                            <apex:facet name="header">Profile</apex:facet>
+                            <apex:outputPanel >
+                                     {!item.displayText}
+                            </apex:outputPanel>
+                        </apex:column>
+        
+                     </apex:pageBlockTable> 
+                   </div>                   
+
+        </apex:pageBlock>          
+
+          
+          
+          
+      
+        
+
+    
+   
+    
+    
+    </apex:form>
+
+
+
+</apex:page>
