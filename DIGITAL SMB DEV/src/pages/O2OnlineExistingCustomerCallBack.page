@@ -1,0 +1,102 @@
+<apex:page controller="O2OnlineExtCustCalBkController" showheader="false" sidebar="false" cache="false" standardStylesheets="false">
+     <body>
+        <!-- Qualaroo for force.com -->
+        <!-- Paste this code right after the <body> tag on every page of your site. -->
+        <script type="text/javascript">
+              var _kiq = _kiq || [];
+              (function(){
+                  setTimeout(function(){
+                    var d = document, f = d.getElementsByTagName('script')[0], s = d.createElement('script'); s.type = 'text/javascript';
+                    s.async = true; s.src = '//s3.amazonaws.com/ki.js/'+'{!$Label.Qualaroo_Id}'; f.parentNode.insertBefore(s, f);
+                  }, 1);
+              })();
+        </script>
+    </body>
+    <head><title>{!$Label.ONLINE_DEFAULT_TITLE}</title>
+    <meta name="keywords" content="business phones, mobile phones, apple mobile phone, iphone, samsung mobile phone, sony mobile phone, htc mobile phone, nokia mobile phone, business, tariffs, business broadband, business landline, great business phone deals, busines, phon, mobil, fone" />
+    <meta name="description" content="O2 business - our latest range of mobile phones, sim only tariffs, landline and broadband for your business" />
+    </head>
+    <apex:composition template="TestPage_SA_MT">
+        <apex:define name="mainContent">
+        <style>
+            .phoneNumber {display:none;}
+        /* vl 20140507 */
+        #contentCol {
+            background-color: #ffffff;
+            padding-top:15px;
+        }            
+        </style>
+        <!--
+            <script type="text/javascript">
+                lpMTagConfig.vars.push(["page","Section","BusinessShop"]);
+
+                if ('{!liveTrackingEnabled}' == 'Y') cmSetProduction();
+                cmCreatePageviewTag("Business Shop Home","Business Shop");
+
+                function callPageElementTag(Name,Category) {
+                    if ('{!liveTrackingEnabled}' == 'Y') cmSetProduction();
+                    cmCreatePageElementTag(Name,Category);
+                }
+            </script>
+        -->
+            <div class="topTitle">
+              <h1 class="fruitiger">Next Steps</h1>
+            </div>
+      
+      <apex:form > 
+          <apex:pageBlock >
+            
+            <apex:pageBlockSection columns="1">   
+                 <h1 class="customerMessage1">As an O2 customer we need to speak with you directly to go through your order</h1>
+      
+                 <h2 class="customerMessage2">How would you like us to contact you?</h2>
+           </apex:pageBlockSection>
+    
+
+           <apex:pageBlockSection columns="2">   
+         
+             <!--  <apex:inputCheckbox value="{!useCallBack.iExistCallBack}"/> -->
+
+            <apex:selectRadio value="{!useCallBack.iExistCallBack}" layout="pageDirection">
+                
+                
+                <apex:selectOption id="calBackOption1" itemLabel="Request a call back" itemValue="Customer requested call back"/>
+                
+                <apex:selectOption id="callBackOption2" itemLabel="Call us on 08800 111 6005" itemValue="Customer shall call us"/>    
+            
+            </apex:selectRadio>
+            
+         
+            
+            <apex:commandButton value="{!submit}" action="{!doSubmit}"/>
+ 
+               <apex:outputpanel id="counter">  
+    
+                <apex:outputText value="{!CallbackMessage}"/>
+                
+               <!-- <apex:actionSupport event="onclick" action="{!doSubmit}" rerender="counter" status="counterStatus"/> -->
+               
+               </apex:outputpanel>
+            
+            
+           <!-- <apex:actionStatus id="counterStatus" startText=" (incrementing...)" stopText=" (done)"/> -->
+             
+             
+
+           <!-- <apex:image /> -->
+                 
+                <!-- <apex:commandButton value="Call us on 08800 111 6005" action="{}"/> -->
+           
+            </apex:pageBlockSection>
+            
+            </apex:pageBlock>
+        
+        </apex:form>
+        
+      
+     
+
+        </apex:define>
+
+    </apex:composition>
+</apex:page>
